@@ -1,0 +1,81 @@
+PAC MEDIA - UPDATE v2 (November 2026) - PATCH NOTES
+===================================================
+
+HOW TO APPLY (3 steps, about 10 minutes)
+  1. Replace your old website files with the files in this folder
+     (keep your edited config.js - the new config.js is identical
+     apart from comments, so nothing to re-enter).
+     Re-deploy: commit + push to GitHub and Vercel redeploys
+     automatically, or drag the folder into Vercel again.
+  2. Supabase Dashboard > SQL Editor > New query > paste the whole
+     database-update.sql file > Run. This adds the new settings,
+     repairs permissions, and creates the image bucket that was
+     missing (the reason uploaded issue images did not show).
+  3. Open your app and reload it twice. The first load fetches the
+     new version, the second shows it.
+
+WHAT'S FIXED / NEW IN THIS UPDATE
+
+  Splash screen
+  - Your uploaded logo now appears immediately. The app remembers
+    it between visits (cached on the phone) and only shows it once
+    fully loaded, so the built-in placeholder never flashes over it.
+
+  Install banner
+  - Never shown anymore when the app is already installed
+    (opened from the home screen icon).
+  - The X button now closes it just for the current visit - readers
+    who tap X will be offered installation again on their next visit.
+
+  Footer text
+  - "Copyright ... A Digital Publishing Platform by Pigeon
+    Advertising & Communications." now sits fixed just above the
+    bottom navigation on every screen (instead of at the end of
+    the page).
+
+  Inside pages (magazine page + issue/reader page)
+  - New red strip at the top with a small logo centered on it.
+  - Dashboard > Branding > "Small square logo (inside pages)":
+    upload your small square PAC logo there. If you don't upload
+    one, the app uses your main logo automatically.
+
+  Magazine logos (hub + magazine pages)
+  - Rounded border on every magazine logo.
+  - Dashboard > Branding > "Magazine logos" lets you adjust:
+    logo width, corner roundness (radius), border thickness
+    (0 = no border) and border color, with a live preview.
+
+  Issues
+  - Issue cards are rebuilt: the cover image sits on top, the
+    issue name below it, and the image is never cropped (same
+    uncropped style as the magazine logos).
+  - The issue page (when you tap an issue) now shows the cover
+    image as well - it was missing entirely before.
+  - Issue images not showing: the app was uploading into a storage
+    bucket that did not exist in your database. database-update.sql
+    creates it. If an image upload ever fails now, the issue is
+    still saved and the app tells you exactly what went wrong
+    instead of silently losing the image.
+  - The button now says "Open Flipbook" instead of "Open".
+
+  Navigation
+  - Swipe left / right anywhere (outside forms) to move between
+    screens - useful on screens without a back button.
+
+FILES IN THIS FOLDER
+  index.html            The whole app (updated).
+  config.js             Your two Supabase keys (unchanged).
+  manifest.json         App info for home-screen install (unchanged).
+  sw.js                 Offline support - cache version bumped so
+                        readers get the update automatically.
+  supabase-setup.sql    Full setup for a NEW database (updated).
+  database-update.sql   NEW - run this once on your existing database.
+  assets/, icons/       Logos and app icons (unchanged).
+
+IF SOMETHING LOOKS OLD AFTER DEPLOYING
+  - Reload the app twice (the service worker refreshes on the
+    first load).
+  - Android Chrome: the install banner only appears in the browser,
+    never inside the installed app.
+  - Still stuck? Send me the exact error text and which screen it
+    happened on.

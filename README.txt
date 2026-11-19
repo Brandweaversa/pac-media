@@ -9,8 +9,12 @@ FILES IN THIS FOLDER
                         keys here (Setup Guide, Steps 6-7).
   manifest.json         App info for the Android/iOS home-screen install.
   sw.js                 Makes the app work offline once installed.
-  supabase-setup.sql    The database setup: paste into Supabase SQL Editor
-                        (Setup Guide, Step 4).
+  supabase-setup.sql    The database setup for a NEW project: paste
+                        into Supabase SQL Editor (Setup Guide, Step 4).
+  database-update.sql   For an EXISTING project: paste into Supabase
+                        SQL Editor once (adds new branding options,
+                        repairs permissions, creates the image bucket).
+  PATCH-NOTES.txt       What changed in this version + how to apply it.
   assets/pac-logo.png   The white PAC logo shown on the red splash screen.
                         Replace this file with your real logo (same name),
                         or upload a logo later from the Dashboard > Branding.
