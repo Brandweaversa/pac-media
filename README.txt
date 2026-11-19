@@ -17,14 +17,14 @@ FILES IN THIS FOLDER
   PATCH-NOTES.txt       What changed in this version + how to apply it.
   assets/               (empty - logos are uploaded from the Dashboard)
 
-HOW TO APPLY UPDATE v6 WITH THE PATCH FILE (pac-media-v6.patch)
-  1. Put pac-media-v6.patch inside your project folder
+HOW TO APPLY UPDATE v7 WITH THE PATCH FILE (pac-media-v7.patch)
+  1. Put pac-media-v7.patch inside your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal, run these one at a time:
        git pull
-       git apply pac-media-v6.patch
+       git apply pac-media-v7.patch
        git add .
-       git commit -m "v6: clean fullscreen flipbook, no overlay buttons"
+       git commit -m "v7: back button on magazine page, no duplicate name"
        git push
   3. Reload the app on your phone twice (first load fetches the new
      version, the second shows it).

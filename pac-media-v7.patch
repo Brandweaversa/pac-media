@@ -1,0 +1,146 @@
+diff --git a/PATCH-NOTES.txt b/PATCH-NOTES.txt
+index c42f0b7..62e545e 100644
+--- a/PATCH-NOTES.txt
++++ b/PATCH-NOTES.txt
+@@ -1,47 +1,40 @@
+-PAC MEDIA - UPDATE v6 (November 2026) - PATCH NOTES
++PAC MEDIA - UPDATE v7 (November 2026) - PATCH NOTES
+ ===================================================
+ 
+ HOW TO APPLY (git patch)
+-  1. Save pac-media-v6.patch into your project folder
++  1. Save pac-media-v7.patch into your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal:
+        git pull
+-       git apply pac-media-v6.patch
++       git apply pac-media-v7.patch
+        git add .
+-       git commit -m "v6: clean fullscreen flipbook, no overlay buttons"
++       git commit -m "v7: back button on magazine page, no duplicate name"
+        git push
+   3. Reload the app on your phone twice (first load fetches the new
+      version, the second shows it).
+ 
+   The patch does NOT touch config.js - your keys stay as they are.
+ 
+-WHAT'S CHANGED IN v6
++WHAT'S CHANGED IN v7
+ 
+-  The flipbook screen is now completely clean
+-  - The floating "<- Back" and "Open ->" buttons are gone. They
+-    covered parts of the magazine pages.
+-  - The popup "If the magazine does not appear..." is gone too.
+-    You confirmed the flipbook opens fine, so there is nothing to
+-    warn about - and nothing sits over the magazine anymore.
+-  - Tapping "Read Issue" now shows ONLY the flipbook, full screen,
+-    edge to edge, with the flipbook's own buttons (zoom, page
+-    navigation, thumbnails, share...) all visible and unobstructed.
+-  - While the magazine loads, a "Loading magazine..." screen shows
+-    briefly and disappears by itself the moment the flipbook is
+-    ready. That is not a popup - it never covers a loaded page.
++  The magazine page (the one listing all issues)
++  - Added a Back button. It sits just below the red strip, on the
++    left, and returns you to the magazines hub. The page never had
++    one - the only way out was the phone's system back.
++  - Removed the magazine name text that sat under the magazine
++    logo. The logo already says who it is, so the name was just a
++    duplicate. The small red dash under the logo stays.
++  - If a magazine ever has no logo uploaded, its name still shows
++    in the logo's place - that fallback is untouched.
+ 
+-  How to get back to the magazine page
+-  - Use your phone's normal Back: the system back button/gesture
+-    (Android), or swipe from the left edge (iPhone in Safari).
+-    In the installed Android app the back button returns from the
+-    flipbook to the magazine page, exactly as before.
+-
+-CARRIED FROM v5 (already in your app)
++CARRIED FROM v6 (already in your app)
++  - Flipbook opens clean and fullscreen: no floating Back/Open
++    buttons, no popup - only the magazine and its own controls.
++    Back out of the flipbook with the phone's system back
++    (or left-edge swipe on iPhone in Safari).
+   - Install banner shows on every visit in the normal browser
+     (Android gets the one-tap Install dialog; other phones get
+     step-by-step instructions). It never appears inside the
+     installed app, and the X closes it just for that visit.
+-  - Bottom navigation and the footer hide while reading and come
+-    back on the magazine page.
+-  - Service worker cache bumped to v6 (every device picks this up
++  - Service worker cache bumped to v7 (every device picks this up
+     with two reloads).
+diff --git a/README.txt b/README.txt
+index 1061732..4bf56f5 100644
+--- a/README.txt
++++ b/README.txt
+@@ -17,14 +17,14 @@ FILES IN THIS FOLDER
+   PATCH-NOTES.txt       What changed in this version + how to apply it.
+   assets/               (empty - logos are uploaded from the Dashboard)
+ 
+-HOW TO APPLY UPDATE v6 WITH THE PATCH FILE (pac-media-v6.patch)
+-  1. Put pac-media-v6.patch inside your project folder
++HOW TO APPLY UPDATE v7 WITH THE PATCH FILE (pac-media-v7.patch)
++  1. Put pac-media-v7.patch inside your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal, run these one at a time:
+        git pull
+-       git apply pac-media-v6.patch
++       git apply pac-media-v7.patch
+        git add .
+-       git commit -m "v6: clean fullscreen flipbook, no overlay buttons"
++       git commit -m "v7: back button on magazine page, no duplicate name"
+        git push
+   3. Reload the app on your phone twice (first load fetches the new
+      version, the second shows it).
+diff --git a/index.html b/index.html
+index e63e3ef..e98441a 100644
+--- a/index.html
++++ b/index.html
+@@ -72,10 +72,11 @@ footer.pagefoot{position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(saf
+ .wrap{max-width:680px;margin:0 auto;padding:0 20px}
+ 
+ /* Magazine page */
+-.mag-head{text-align:center;padding:32px 20px 4px}
++.pageback{display:inline-flex;align-items:center;gap:6px;color:var(--red);font-weight:800;font-size:13px;letter-spacing:.02em;padding:14px 20px 0}
++.pageback:active{opacity:.7}
++.mag-head{text-align:center;padding:20px 20px 4px}
+ .mag-head-tile{padding:22px 28px}
+ .mag-head .mag-tile img{width:min(var(--hub-w),66vw)}
+-.mag-name{font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-top:16px;font-weight:600}
+ .issues{display:flex;flex-direction:column;gap:18px;padding:26px 20px 0;max-width:560px;margin:0 auto}
+ 
+ /* Issue card: cover image on top (uncropped), title below */
+@@ -469,6 +470,7 @@ async function renderMagazine(slug, epoch) {
+     if (m.error) throw m.error;
+     if (!m.data) {
+       box.innerHTML = '<div class="redstrip">' + squareLogoHTML() + '</div>' +
++        '<a class="pageback" href="#/">&larr; Back</a>' +
+         '<div class="empty"><div class="card"><h3>Magazine not found</h3><p>It may have been removed.</p></div></div>';
+       return;
+     }
+@@ -483,11 +485,12 @@ async function renderMagazine(slug, epoch) {
+       : '<div class="empty" style="margin:8px auto 0"><div class="card"><h3>No issues yet</h3><p>Issues for this magazine will appear here.</p></div></div>';
+     box.innerHTML =
+       '<div class="redstrip">' + squareLogoHTML() + '</div>' +
++      '<a class="pageback" href="#/">&larr; Back</a>' +
+       '<div class="mag-head">' +
+       '<span class="mag-tile mag-head-tile">' +
+       (mag.logo_url ? '<img src="' + esc(mag.logo_url) + '" alt="' + esc(mag.name) + '">' : '<span class="tile-name">' + esc(mag.name) + '</span>') +
+       '</span>' +
+-      '<div class="reddash"></div><div class="mag-name">' + esc(mag.name) + '</div></div>' +
++      '<div class="reddash"></div></div>' +
+       '<div class="issues">' + cards + '</div>';
+   } catch (e) { box.innerHTML = stripHTML() + errView(e.message); }
+ }
+diff --git a/sw.js b/sw.js
+index 71309b0..86ad364 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,5 +1,5 @@
+ /* PAC Media service worker - offline app shell */
+-const CACHE = 'pac-media-v6';
++const CACHE = 'pac-media-v7';
+ const ASSETS = [
+   './',
+   './index.html',
