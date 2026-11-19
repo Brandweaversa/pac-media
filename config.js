@@ -11,5 +11,5 @@
 //  API. Full instructions: Setup Guide, Steps 6-7.
 // ============================================================
 
-const SUPABASE_URL = "PASTE-YOUR-SUPABASE-PROJECT-URL-HERE";
-const SUPABASE_ANON_KEY = "PASTE-YOUR-SUPABASE-ANON-KEY-HERE";
+const SUPABASE_URL = "https://wzgyqvifkywcrognjpmx.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_D4b39ue3TZTjZ_8Rb-2-uQ_Zr-7NVhj";
