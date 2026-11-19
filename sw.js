@@ -1,5 +1,5 @@
 /* PAC Media service worker - offline app shell */
-const CACHE = 'pac-media-v1';
+const CACHE = 'pac-media-v2';
 const ASSETS = [
   './',
   './index.html',

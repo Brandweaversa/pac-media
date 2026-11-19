@@ -17,7 +17,7 @@
 <script src="config.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--red:#C8102E;--ink:#141414;--muted:#6b6b6b;--line:#e7e7e7;--bg:#ffffff;--splash-w:327px;--hub-w:260px}
+:root{--red:#C8102E;--ink:#141414;--muted:#6b6b6b;--line:#e7e7e7;--bg:#ffffff;--splash-w:327px;--hub-w:260px;--mag-radius:16px;--mag-bw:2px;--mag-bc:#C8102E;--nav-h:58px;--foot-h:48px}
 html,body{height:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
 img{max-width:100%;height:auto;display:block}
@@ -27,24 +27,31 @@ button{font:inherit;cursor:pointer}
 /* Splash */
 #splash{position:fixed;inset:0;background:var(--red);display:flex;align-items:center;justify-content:center;z-index:100;transition:opacity .55s ease}
 #splash.gone{opacity:0;pointer-events:none}
-#splashLogo{width:min(var(--splash-w),84vw);height:auto}
+#splashLogo{width:min(var(--splash-w),84vw);height:auto;opacity:0;transition:opacity .2s ease}
 #splashFooter{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;color:#fff;font-size:11px;opacity:.95;padding:0 16px;line-height:1.5}
 
 /* App shell */
 #app{min-height:100dvh}
-footer.pagefoot{text-align:center;font-size:11px;color:var(--muted);padding:26px 16px calc(92px + env(safe-area-inset-bottom,0px));line-height:1.6}
+#view{padding-bottom:calc(var(--nav-h) + var(--foot-h) + 16px + env(safe-area-inset-bottom,0px))}
+body.readerview #view{padding-bottom:0}
+footer.pagefoot{position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);text-align:center;font-size:11px;color:var(--muted);padding:8px 16px;line-height:1.5;z-index:49}
 
 /* Top bar / brand */
 .topbar{padding:30px 20px 0;text-align:center}
 .brand{font-weight:800;letter-spacing:.16em;font-size:clamp(15px,4vw,19px);text-transform:uppercase}
 .reddash{width:42px;height:4px;background:var(--red);border-radius:2px;margin:10px auto 0}
 
+/* Red strip with small square logo (inside pages) */
+.redstrip{background:var(--red);padding:12px;display:flex;align-items:center;justify-content:center}
+.strip-logo{height:44px;width:auto;max-width:70vw;object-fit:contain}
+
 /* Hub */
 .stack{display:flex;flex-direction:column;align-items:center;gap:36px;padding:46px 22px 10px;max-width:680px;margin:0 auto}
 .hub-logo{display:block}
 .hub-logo:active{opacity:.7}
 .hub-logo img{width:min(var(--hub-w),78vw);height:auto}
-.logo-fallback{border:2px solid var(--red);color:var(--red);font-weight:800;letter-spacing:.1em;padding:22px 34px;text-transform:uppercase;font-size:18px}
+.mag-logo-frame{border-radius:var(--mag-radius);border:var(--mag-bw) solid var(--mag-bc);background:#fff}
+.logo-fallback{color:var(--red);font-weight:800;letter-spacing:.1em;padding:22px 34px;text-transform:uppercase;font-size:18px}
 
 /* Bottom nav */
 #bottomNav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;gap:56px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));z-index:50}
@@ -60,26 +67,32 @@ footer.pagefoot{text-align:center;font-size:11px;color:var(--muted);padding:26px
 .mag-head{text-align:center;padding:32px 20px 4px}
 .mag-head img{width:min(var(--hub-w),72vw);margin:0 auto}
 .mag-name{font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-top:14px}
-.issues{display:flex;flex-direction:column;gap:16px;padding:28px 20px 0;max-width:680px;margin:0 auto}
-.issue-card{position:relative;display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.issues{display:flex;flex-direction:column;gap:18px;padding:26px 20px 0;max-width:560px;margin:0 auto}
+
+/* Issue card: cover image on top (uncropped), title below */
+.issue-card{position:relative;display:block;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
 .issue-card:active{background:#fafafa}
-.issue-thumb{width:104px;flex:0 0 104px;background:#f4f4f4;align-self:stretch}
-.issue-thumb img{width:100%;height:124px;object-fit:cover}
-.issue-meta{padding:12px 14px 12px 0}
+.issue-cover{background:#f4f4f4;display:flex;align-items:center;justify-content:center}
+.issue-cover img{width:100%;height:auto;object-fit:contain}
+.issue-cover .noimg{padding:44px 12px;color:#adadad;font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.issue-meta{padding:12px 16px 14px}
 .issue-title{font-weight:700;font-size:15px;line-height:1.35}
 .issue-read{color:var(--red);font-size:11px;font-weight:800;margin-top:6px;letter-spacing:.12em}
 .draft-badge{position:absolute;top:8px;right:8px;background:#111;color:#fff;font-size:10px;padding:3px 8px;border-radius:99px;letter-spacing:.06em}
 
 /* Reader */
-.reader{display:flex;flex-direction:column;min-height:100dvh}
-.reader-bar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);background:#fff}
+body.readerview{overflow:hidden}
+.reader{display:flex;flex-direction:column;height:calc(100dvh - var(--nav-h) - var(--foot-h) - env(safe-area-inset-bottom,0px))}
+.reader-bar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);background:#fff;flex:0 0 auto}
 .reader-bar .back{color:var(--red);font-weight:700;font-size:13px;white-space:nowrap}
 .reader-title{flex:1;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.open-btn{background:var(--red);color:#fff;font-weight:700;font-size:13px;padding:8px 14px;border-radius:99px;white-space:nowrap}
-.reader-frame{position:relative;flex:1;min-height:60dvh}
-.reader-frame iframe{width:100%;height:calc(100dvh - 130px);border:0;background:#f6f6f6}
+.open-btn{background:var(--red);color:#fff;font-weight:700;font-size:12px;padding:8px 12px;border-radius:99px;white-space:nowrap}
+.reader-cover{background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;max-height:32dvh;overflow:hidden}
+.reader-cover img{max-height:30dvh;width:auto;max-width:100%;object-fit:contain}
+.reader-frame{position:relative;flex:1;min-height:0}
+.reader-frame iframe{width:100%;height:100%;border:0;background:#f6f6f6}
 .frame-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;background:#fff}
-.frame-hint{margin:10px 16px;padding:10px 12px;background:#fff7f7;border:1px solid var(--red);color:var(--ink);font-size:12px;border-radius:10px;line-height:1.5}
+.frame-hint{position:absolute;left:16px;right:16px;bottom:12px;padding:10px 12px;background:#fff7f7;border:1px solid var(--red);color:var(--ink);font-size:12px;border-radius:10px;line-height:1.5}
 
 /* Admin */
 .adminbox{max-width:440px;margin:40px auto;padding:0 20px}
@@ -106,7 +119,7 @@ input:focus,textarea:focus{outline:2px solid var(--red);border-color:var(--red)}
 .tab{padding:9px 16px;border-radius:99px;border:1.5px solid var(--line);font-weight:700;font-size:13px;background:#fff;color:#555}
 .tab.active{border-color:var(--red);color:var(--red)}
 .rowitem{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:12px;background:#fff}
-.rowitem img.rthumb{width:56px;height:56px;object-fit:cover;border-radius:10px;background:#f4f4f4;flex:0 0 56px}
+.rowitem img.rthumb{width:56px;height:56px;object-fit:contain;border-radius:10px;background:#f4f4f4;flex:0 0 56px}
 .rowitem .grow{flex:1;min-width:0}
 .rowitem .rtitle{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowitem .rsub{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -120,15 +133,17 @@ input[type=color]{width:52px;height:40px;border:1px solid #d6d6d6;border-radius:
 .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
 .previewbox{margin-top:10px;border:1px dashed #d6d6d6;border-radius:10px;padding:12px;text-align:center;background:#fafafa}
 .previewbox img{max-width:60%;margin:0 auto}
+.previewbox.red{background:var(--red)}
+.previewbox.red img{max-height:56px}
 
 /* Install banner */
-#installBanner{position:fixed;left:14px;right:14px;bottom:calc(78px + env(safe-area-inset-bottom,0px));background:var(--red);color:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+#installBanner{position:fixed;left:14px;right:14px;bottom:calc(var(--nav-h) + var(--foot-h) + 14px + env(safe-area-inset-bottom,0px));background:var(--red);color:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 #installBanner .t{flex:1;font-size:13px;font-weight:600;line-height:1.4}
 #installBanner .installbtn{background:#fff;color:var(--red);border:0;border-radius:99px;padding:9px 14px;font-weight:800;font-size:13px;white-space:nowrap}
 #installBanner .dismiss{background:transparent;color:#fff;border:0;font-size:16px;opacity:.85;padding:4px}
 
 /* Toast */
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:#111;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;z-index:80;max-width:88vw;text-align:center}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + var(--foot-h) + 16px + env(safe-area-inset-bottom,0px));background:#111;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;z-index:80;max-width:88vw;text-align:center}
 
 /* Modal (iOS install steps) */
 .modal-back{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -144,8 +159,6 @@ input[type=color]{width:52px;height:40px;border:1px solid #d6d6d6;border-radius:
 .empty p{font-size:13px;color:var(--muted);line-height:1.7}
 
 @media (max-width:420px){
-  .issue-thumb{width:88px;flex-basis:88px}
-  .issue-thumb img{height:106px}
   #bottomNav{gap:40px}
 }
 </style>
@@ -186,6 +199,10 @@ const DEFAULTS = {
   splash_logo_h: 239,
   hub_logo_w: 260,
   logo_url: '',
+  square_logo_url: '',
+  mag_logo_radius: 16,
+  mag_logo_border_w: 2,
+  mag_logo_border_color: '#C8102E',
   footer_text: 'A Digital Publishing Platform by Pigeon Advertising & Communications.',
   admin_created: false,
   admin_user_id: null
@@ -196,10 +213,13 @@ let session = null;
 let deferPrompt = null;
 let splashHidden = false;
 let routeEpoch = 0;   // bumped on every route render; stale async renders bail out
+let curMag = { id: null, name: '' };
 const bind = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
 
 const footerText = () => 'Copyright ' + YEAR + '. ' + (S.footer_text || DEFAULTS.footer_text);
 const cfgReady = () => sb !== null;
+const num = (v, def) => { const n = parseInt(v, 10); return isNaN(n) ? def : n; };
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 /* ---------- Supabase client ---------- */
 (function initClient() {
@@ -212,17 +232,46 @@ const cfgReady = () => sb !== null;
   } catch (e) { console.warn('Supabase init failed', e); }
 })();
 
+/* ---------- splash logo (no placeholder flash) ---------- */
+let lastSplashUrl = null;
+let splashLogoPromise = Promise.resolve();
+function setSplashLogo(url) {
+  if (url === lastSplashUrl) return splashLogoPromise;
+  lastSplashUrl = url;
+  const img = $('splashLogo');
+  if (!url) { img.style.opacity = '1'; splashLogoPromise = Promise.resolve(); return splashLogoPromise; }
+  // Custom logo: load it fully BEFORE revealing anything, so the built-in
+  // placeholder never flashes over (or instead of) the uploaded logo.
+  img.style.opacity = '0';
+  splashLogoPromise = new Promise((res) => {
+    const reveal = () => { img.style.opacity = '1'; res(); };
+    const probe = new Image();
+    probe.onload = () => { img.src = url; reveal(); };
+    probe.onerror = reveal;
+    setTimeout(reveal, 1600);  // safety: never leave the splash blank forever
+    probe.src = url;
+  });
+  return splashLogoPromise;
+}
+
 /* ---------- theme / footer ---------- */
 function applyTheme() {
   const root = document.documentElement;
   root.style.setProperty('--red', S.brand_red || DEFAULTS.brand_red);
-  root.style.setProperty('--splash-w', (S.splash_logo_w || 327) + 'px');
-  root.style.setProperty('--hub-w', (S.hub_logo_w || 260) + 'px');
+  root.style.setProperty('--splash-w', (num(S.splash_logo_w, 327)) + 'px');
+  root.style.setProperty('--hub-w', (num(S.hub_logo_w, 260)) + 'px');
+  root.style.setProperty('--mag-radius', clamp(num(S.mag_logo_radius, 16), 0, 80) + 'px');
+  root.style.setProperty('--mag-bw', clamp(num(S.mag_logo_border_w, 2), 0, 12) + 'px');
+  root.style.setProperty('--mag-bc', S.mag_logo_border_color || DEFAULTS.mag_logo_border_color);
   const m = $('metaTheme'); if (m) m.content = S.brand_red || DEFAULTS.brand_red;
   document.title = S.app_name || 'PAC Media';
-  if (S.logo_url) $('splashLogo').src = S.logo_url;
+  setSplashLogo(S.logo_url || '');
   $('splashFooter').textContent = footerText();
   $('pageFooter').textContent = footerText();
+}
+function squareLogoSrc() { return S.square_logo_url || S.logo_url || 'assets/pac-logo.png'; }
+function squareLogoHTML() {
+  return '<img class="strip-logo" src="' + esc(squareLogoSrc()) + '" alt="' + esc(S.app_name || 'PAC Media') + '">';
 }
 
 /* ---------- toast ---------- */
@@ -230,21 +279,31 @@ let toastTimer = null;
 function toast(msg) {
   const t = $('toast'); t.textContent = msg; t.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.hidden = true; }, 2800);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 3400);
 }
 
 /* ---------- boot (splash -> app) ---------- */
 async function boot() {
   const t0 = Date.now();
+  // Show last-known logo instantly (before any network round trip)
+  try { const c = localStorage.getItem('pacLogoUrl'); if (c) S.logo_url = c; } catch (e) { /* ignore */ }
+  applyTheme();
+  let ok = false;
   try {
     if (sb) {
       const res = await sb.from('app_settings').select('*').eq('id', 1).maybeSingle();
       if (res.data) S = Object.assign({}, DEFAULTS, res.data);
       const ses = await sb.auth.getSession();
       session = (ses.data && ses.data.session) || null;
+      ok = true;
     }
   } catch (e) { console.warn('boot data load failed', e); }
+  try {
+    if (ok && S.logo_url) localStorage.setItem('pacLogoUrl', S.logo_url);
+    else localStorage.removeItem('pacLogoUrl');
+  } catch (e) { /* ignore */ }
   applyTheme();
+  try { await splashLogoPromise; } catch (e) { /* ignore */ }
   await sleep(Math.max(0, 1700 - (Date.now() - t0)));  // splash every launch, ~1.7s
   $('splash').classList.add('gone');
   setTimeout(() => { $('splash').style.display = 'none'; }, 600);
@@ -268,6 +327,7 @@ function route() {
   const parts = h.split('/').filter(Boolean).map(decodeURIComponent);
   const view = $('view');
   let after = null;
+  document.body.classList.toggle('readerview', parts[0] === 'read');
   if (parts[0] === 'pac-admin') {
     view.innerHTML = '<div id="adminGate"></div>';
     after = renderAdminGate;
@@ -290,6 +350,25 @@ function route() {
   window.scrollTo(0, 0);
   $('pageFooter').textContent = footerText();
 }
+
+/* ---------- swipe navigation (screens without a back button) ---------- */
+let swX = 0, swY = 0, swT = 0;
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) { swT = 0; return; }
+  const t = e.changedTouches[0];
+  swX = t.clientX; swY = t.clientY; swT = Date.now();
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+  if (!swT || !splashHidden) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - swX, dy = t.clientY - swY, dt = Date.now() - swT;
+  swT = 0;
+  if (dt > 700 || Math.abs(dx) < 72 || Math.abs(dy) > 56) return;
+  if (Math.abs(dx) < Math.abs(dy) * 1.5) return;  // must be a clearly horizontal swipe
+  if (e.target && e.target.closest && e.target.closest('input,textarea,select,[contenteditable]')) return;
+  if (dx > 0) { if (history.length > 1) history.back(); }
+  else { history.forward(); }
+}, { passive: true });
 
 /* ---------- bottom nav ---------- */
 const NAV_ICONS = {
@@ -333,7 +412,9 @@ async function renderHub(epoch) {
   const stack = mags.length
     ? mags.map((m) =>
         '<a class="hub-logo" href="#/magazine/' + encodeURIComponent(m.slug) + '" aria-label="' + esc(m.name) + '">' +
-        (m.logo_url ? '<img src="' + esc(m.logo_url) + '" alt="' + esc(m.name) + '">' : '<div class="logo-fallback">' + esc(m.name) + '</div>') +
+        (m.logo_url
+          ? '<img class="mag-logo-frame" src="' + esc(m.logo_url) + '" alt="' + esc(m.name) + '">'
+          : '<div class="logo-fallback mag-logo-frame">' + esc(m.name) + '</div>') +
         '</a>').join('')
     : '<div class="empty" style="margin:10px auto 0"><div class="card"><h3>No magazines yet</h3><p>' +
       (cfgReady() ? 'Sign in to the Dashboard to publish your first magazine.' : 'Connect Supabase in config.js (Setup Guide, Steps 6-7) to go live.') +
@@ -344,7 +425,9 @@ async function renderHub(epoch) {
 /* ---------- magazine page ---------- */
 function issueCard(i) {
   return '<a class="issue-card" href="#/read/' + i.id + '">' +
-    '<div class="issue-thumb">' + (i.thumbnail_url ? '<img src="' + esc(i.thumbnail_url) + '" alt="" loading="lazy">' : '') + '</div>' +
+    '<div class="issue-cover">' + (i.thumbnail_url
+      ? '<img src="' + esc(i.thumbnail_url) + '" alt="' + esc(i.title) + '" loading="lazy">'
+      : '<div class="noimg">No cover image</div>') + '</div>' +
     '<div class="issue-meta"><div class="issue-title">' + esc(i.title) + '</div><div class="issue-read">READ ISSUE</div></div>' +
     (i.published ? '' : '<span class="draft-badge">DRAFT</span>') +
     '</a>';
@@ -357,7 +440,8 @@ async function renderMagazine(slug, epoch) {
     if (epoch !== routeEpoch) return;
     if (m.error) throw m.error;
     if (!m.data) {
-      box.innerHTML = topbarHTML() + '<div class="empty"><div class="card"><h3>Magazine not found</h3><p>It may have been removed.</p></div></div>';
+      box.innerHTML = '<div class="redstrip">' + squareLogoHTML() + '</div>' +
+        '<div class="empty"><div class="card"><h3>Magazine not found</h3><p>It may have been removed.</p></div></div>';
       return;
     }
     const mag = m.data;
@@ -370,8 +454,11 @@ async function renderMagazine(slug, epoch) {
       ? list.map(issueCard).join('')
       : '<div class="empty" style="margin:8px auto 0"><div class="card"><h3>No issues yet</h3><p>Issues for this magazine will appear here.</p></div></div>';
     box.innerHTML =
+      '<div class="redstrip">' + squareLogoHTML() + '</div>' +
       '<div class="mag-head">' +
-      (mag.logo_url ? '<img src="' + esc(mag.logo_url) + '" alt="' + esc(mag.name) + '">' : '<div class="logo-fallback">' + esc(mag.name) + '</div>') +
+      (mag.logo_url
+        ? '<img class="mag-logo-frame" src="' + esc(mag.logo_url) + '" alt="' + esc(mag.name) + '">'
+        : '<div class="logo-fallback mag-logo-frame">' + esc(mag.name) + '</div>') +
       '<div class="reddash"></div><div class="mag-name">' + esc(mag.name) + '</div></div>' +
       '<div class="issues">' + cards + '</div>';
   } catch (e) { box.innerHTML = errView(e.message); }
@@ -393,15 +480,19 @@ async function renderReader(id, epoch) {
     const backHref = (iss.magazines && iss.magazines.slug) ? '#/magazine/' + encodeURIComponent(iss.magazines.slug) : '#/';
     box.innerHTML =
       '<div class="reader">' +
+        '<div class="redstrip">' + squareLogoHTML() + '</div>' +
         '<div class="reader-bar">' +
           '<a class="back" href="' + backHref + '">&larr; Back</a>' +
           '<div class="reader-title">' + esc(iss.title) + '</div>' +
-          '<a class="open-btn" href="' + esc(iss.flipbook_url) + '" target="_blank" rel="noopener">Open</a>' +
+          '<a class="open-btn" href="' + esc(iss.flipbook_url) + '" target="_blank" rel="noopener">Open Flipbook</a>' +
         '</div>' +
+        (iss.thumbnail_url
+          ? '<div class="reader-cover"><img src="' + esc(iss.thumbnail_url) + '" alt="' + esc(iss.title) + '"></div>'
+          : '') +
         '<div class="reader-frame">' +
           '<iframe id="flipFrame" src="' + esc(iss.flipbook_url) + '" title="' + esc(iss.title) + '" allow="fullscreen"></iframe>' +
           '<div class="frame-loading" id="frameLoading">Loading magazine&#8230;</div>' +
-          '<div class="frame-hint" id="frameHint" hidden>If the magazine does not appear, this flipbook host blocks embedding. Tap <b>Open</b> (top right) to read it in a new tab.</div>' +
+          '<div class="frame-hint" id="frameHint" hidden>If the magazine does not appear, this flipbook host blocks embedding. Tap <b>Open Flipbook</b> (top right) to read it in a new tab.</div>' +
         '</div>' +
       '</div>';
     const fr = $('flipFrame'), fl = $('frameLoading'), fh = $('frameHint');
@@ -577,7 +668,11 @@ async function uploadImage(file, folder) {
   if (dot > -1) ext = file.name.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
   const path = folder + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
   const up = await sb.storage.from('media').upload(path, file, { cacheControl: '3600' });
-  if (up.error) throw up.error;
+  if (up.error) {
+    const msg = up.error.message || String(up.error);
+    if (/bucket/i.test(msg)) throw new Error('Image storage is not ready (' + msg + '). Run database-update.sql in the Supabase SQL Editor (see README), then try again.');
+    throw up.error;
+  }
   const pub = sb.storage.from('media').getPublicUrl(path);
   return pub.data ? pub.data.publicUrl : null;
 }
@@ -596,33 +691,67 @@ function renderBrandingTab() {
       '<div class="hint">Shown at the top of the magazine hub and in the browser tab.</div>' +
       '<label>Brand red</label><div class="colorrow"><input type="color" id="fRed" value="' + esc(S.brand_red) + '">' +
       '<input type="text" id="fRedHex" value="' + esc(S.brand_red) + '" style="max-width:140px"></div>' +
-      '<div class="hint">Used for the splash screen background, buttons and accents. Default #C8102E.</div>' +
+      '<div class="hint">Used for the splash screen, the red strip on inside pages, buttons and accents. Default #C8102E.</div>' +
       '<label>Splash logo width (px)</label><input type="number" id="fSplashW" min="80" max="600" value="' + esc(S.splash_logo_w) + '">' +
       '<label>Splash logo height (px)</label><input type="number" id="fSplashH" min="60" max="600" value="' + esc(S.splash_logo_h) + '">' +
       '<div class="hint">Your logo is 327 wide x 239 high. The height keeps the logo&#8217;s proportions on small screens automatically.</div>' +
-      '<label>Hub logo width (px)</label><input type="number" id="fHubW" min="80" max="600" value="' + esc(S.hub_logo_w) + '">' +
       '<label>Footer text</label><textarea id="fFooter" rows="2">' + esc(S.footer_text) + '</textarea>' +
-      '<div class="hint">The app adds &quot;Copyright ' + YEAR + '.&quot; (current year, auto-updating) in front of this on every screen.</div>' +
+      '<div class="hint">Shown just above the bottom navigation on every screen. The app adds &quot;Copyright ' + YEAR + '.&quot; (current year, auto-updating) in front of it.</div>' +
       '<button class="btn block" id="saveBranding" style="margin-top:18px">Save branding</button>' +
       '<div id="brandMsg"></div>' +
     '</div>' +
     '<div class="formcard"><h3>Main logo (splash screen)</h3>' +
-      '<div class="previewbox">' + (S.logo_url ? '<img src="' + esc(S.logo_url) + '" alt="logo">' : '<img src="assets/pac-logo.png" alt="logo">') + '</div>' +
+      '<div class="previewbox" style="background:var(--red)">' + (S.logo_url ? '<img src="' + esc(S.logo_url) + '" alt="logo">' : '<img src="assets/pac-logo.png" alt="logo">') + '</div>' +
       '<div class="hint">Currently using the built-in placeholder. Upload your real white-on-transparent pac-logo.png here.</div>' +
       '<label>Upload new logo (PNG, white on transparent)</label><input type="file" id="fLogo" accept="image/*">' +
       '<button class="btn block" id="uploadLogo" style="margin-top:14px">Upload logo</button>' +
       '<div id="logoMsg"></div>' +
+    '</div>' +
+    '<div class="formcard"><h3>Small square logo (inside pages)</h3>' +
+      '<div class="previewbox red"><img src="' + esc(squareLogoSrc()) + '" alt="square logo"></div>' +
+      '<div class="hint">This small logo sits centered on the red strip at the top of the magazine and issue pages. If you don&#8217;t upload one, the app uses your main logo.</div>' +
+      '<label>Upload small square logo</label><input type="file" id="fSqLogo" accept="image/*">' +
+      '<button class="btn block" id="uploadSqLogo" style="margin-top:14px">Upload square logo</button>' +
+      '<div id="sqLogoMsg"></div>' +
+    '</div>' +
+    '<div class="formcard"><h3>Magazine logos (hub &amp; magazine pages)</h3>' +
+      '<label>Magazine logo width (px)</label><input type="number" id="fHubW" min="80" max="600" value="' + esc(S.hub_logo_w) + '">' +
+      '<div class="hint">Width of every magazine logo on the hub and on its magazine page. Height keeps the logo&#8217;s own proportions.</div>' +
+      '<label>Rounded border radius (px)</label><input type="number" id="fMagR" min="0" max="80" value="' + esc(S.mag_logo_radius) + '">' +
+      '<div class="hint">0 = square corners. Higher numbers = rounder corners.</div>' +
+      '<label>Border thickness (px)</label><input type="number" id="fMagBW" min="0" max="12" value="' + esc(S.mag_logo_border_w) + '">' +
+      '<div class="hint">0 = no border around magazine logos.</div>' +
+      '<label>Border color</label><div class="colorrow"><input type="color" id="fMagBC" value="' + esc(S.mag_logo_border_color) + '">' +
+      '<input type="text" id="fMagBCHex" value="' + esc(S.mag_logo_border_color) + '" style="max-width:140px"></div>' +
+      '<div class="previewbox"><img id="magLogoPreview" src="' + esc(S.logo_url || 'assets/pac-logo.png') + '" style="border-radius:' + esc(clamp(num(S.mag_logo_radius, 16), 0, 80)) + 'px;border:' + esc(clamp(num(S.mag_logo_border_w, 2), 0, 12)) + 'px solid ' + esc(S.mag_logo_border_color || '#C8102E') + ';width:min(200px,60%)" alt="preview"></div>' +
+      '<div class="hint">Preview uses your main logo as an example.</div>' +
+      '<button class="btn block" id="saveMagLogos" style="margin-top:18px">Save logo settings</button>' +
+      '<div id="magLogoMsg"></div>' +
     '</div>';
   const red = $('fRed'), redHex = $('fRedHex');
   red.oninput = () => { redHex.value = red.value; };
   redHex.onchange = () => { if (/^#[0-9a-fA-F]{6}$/.test(redHex.value)) red.value = redHex.value; };
+  const bc = $('fMagBC'), bcHex = $('fMagBCHex');
+  bc.oninput = () => { bcHex.value = bc.value; syncMagPreview(); };
+  bcHex.onchange = () => { if (/^#[0-9a-fA-F]{6}$/.test(bcHex.value)) { bc.value = bcHex.value; syncMagPreview(); } };
+  function syncMagPreview() {
+    const p = $('magLogoPreview');
+    if (!p) return;
+    const r = clamp(num($('fMagR').value, 16), 0, 80);
+    const w = clamp(num($('fMagBW').value, 2), 0, 12);
+    const c = /^#[0-9a-fA-F]{6}$/.test(bcHex.value) ? bcHex.value : (bc.value || '#C8102E');
+    p.style.borderRadius = r + 'px';
+    p.style.borderWidth = w + 'px';
+    p.style.borderColor = c;
+  }
+  $('fMagR').oninput = syncMagPreview;
+  $('fMagBW').oninput = syncMagPreview;
   $('saveBranding').onclick = async () => {
     const patch = {
       app_name: $('fAppName').value.trim() || 'PAC Media',
       brand_red: /^#[0-9a-fA-F]{6}$/.test(redHex.value) ? redHex.value : S.brand_red,
-      splash_logo_w: Math.max(80, Math.min(600, parseInt($('fSplashW').value, 10) || 327)),
-      splash_logo_h: Math.max(60, Math.min(600, parseInt($('fSplashH').value, 10) || 239)),
-      hub_logo_w: Math.max(80, Math.min(600, parseInt($('fHubW').value, 10) || 260)),
+      splash_logo_w: clamp(num($('fSplashW').value, 327), 80, 600),
+      splash_logo_h: clamp(num($('fSplashH').value, 239), 60, 600),
       footer_text: $('fFooter').value.trim() || DEFAULTS.footer_text,
       updated_at: new Date().toISOString()
     };
@@ -635,6 +764,28 @@ function renderBrandingTab() {
       gateMsg('brandMsg', 'ok', 'Saved.');
     } catch (e) { gateMsg('brandMsg', 'err', e.message); }
     $('saveBranding').disabled = false;
+  };
+  $('saveMagLogos').onclick = async () => {
+    const patch = {
+      hub_logo_w: clamp(num($('fHubW').value, 260), 80, 600),
+      mag_logo_radius: clamp(num($('fMagR').value, 16), 0, 80),
+      mag_logo_border_w: clamp(num($('fMagBW').value, 2), 0, 12),
+      mag_logo_border_color: /^#[0-9a-fA-F]{6}$/.test($('fMagBCHex').value) ? $('fMagBCHex').value : S.mag_logo_border_color,
+      updated_at: new Date().toISOString()
+    };
+    $('saveMagLogos').disabled = true;
+    try {
+      const r = await sb.from('app_settings').update(patch).eq('id', 1).select().maybeSingle();
+      if (r.error) throw r.error;
+      if (r.data) S = Object.assign({}, DEFAULTS, r.data);
+      applyTheme(); route();
+      gateMsg('magLogoMsg', 'ok', 'Saved.');
+    } catch (e) {
+      gateMsg('magLogoMsg', 'err', /column/i.test(e.message || '')
+        ? 'The database is missing the new settings columns. Run database-update.sql in the Supabase SQL Editor (see README), then try again.'
+        : e.message);
+    }
+    $('saveMagLogos').disabled = false;
   };
   $('uploadLogo').onclick = async () => {
     const f = $('fLogo').files[0];
@@ -650,6 +801,21 @@ function renderBrandingTab() {
       gateMsg('logoMsg', 'ok', 'Logo updated.');
       renderBrandingTab();
     } catch (e) { gateMsg('logoMsg', 'err', e.message); $('uploadLogo').disabled = false; $('uploadLogo').textContent = 'Upload logo'; }
+  };
+  $('uploadSqLogo').onclick = async () => {
+    const f = $('fSqLogo').files[0];
+    if (!f) return gateMsg('sqLogoMsg', 'err', 'Choose an image file first.');
+    $('uploadSqLogo').disabled = true; $('uploadSqLogo').textContent = 'Uploading&#8230;';
+    try {
+      const url = await uploadImage(f, 'branding');
+      if (!url) throw new Error('Upload failed.');
+      const r = await sb.from('app_settings').update({ square_logo_url: url, updated_at: new Date().toISOString() }).eq('id', 1).select().maybeSingle();
+      if (r.error) throw r.error;
+      if (r.data) S = Object.assign({}, DEFAULTS, r.data);
+      applyTheme();
+      gateMsg('sqLogoMsg', 'ok', 'Square logo updated.');
+      renderBrandingTab();
+    } catch (e) { gateMsg('sqLogoMsg', 'err', e.message); $('uploadSqLogo').disabled = false; $('uploadSqLogo').textContent = 'Upload square logo'; }
   };
 }
 /* ---------- magazines tab ---------- */
@@ -716,8 +882,11 @@ async function createMagazine() {
   const name = $('nmName').value.trim();
   if (!name) return gateMsg('nmMsg', 'err', 'Please give the magazine a name.');
   $('nmSave').disabled = true; $('nmSave').textContent = 'Saving&#8230;';
+  let logoUrl = null, logoErr = null;
   try {
-    const logoUrl = await uploadImage($('nmLogo').files[0], 'magazines');
+    logoUrl = await uploadImage($('nmLogo').files[0], 'magazines');
+  } catch (e) { logoErr = e.message; }
+  try {
     let slug = slugify(name);
     let done = false;
     for (let i = 2; i < 8 && !done; i++) {
@@ -730,9 +899,9 @@ async function createMagazine() {
       else throw ins.error;
     }
     if (!done) throw new Error('Could not create a unique web address for this magazine. Try a slightly different name.');
-    toast('Magazine created');
+    toast(logoErr ? 'Magazine created, but the logo failed to upload: ' + logoErr : 'Magazine created');
     renderMagsTab();
-  } catch (e) { gateMsg('nmMsg', 'err', e.message); $('nmSave').disabled = false; $('nmSave').textContent = 'Create magazine'; }
+  } catch (e) { gateMsg('nmMsg', 'err', (logoErr ? 'Logo upload failed: ' + logoErr + '. ' : '') + e.message); $('nmSave').disabled = false; $('nmSave').textContent = 'Create magazine'; }
 }
 
 function showEditMagForm(id, m) {
@@ -746,13 +915,16 @@ function showEditMagForm(id, m) {
     if (!name) return gateMsg('emMsg', 'err', 'Name cannot be empty.');
     $('emSave').disabled = true; $('emSave').textContent = 'Saving&#8230;';
     try {
-      let logoUrl = null;
-      if ($('emLogo').files[0]) { logoUrl = await uploadImage($('emLogo').files[0], 'magazines'); }
+      let logoUrl = null, logoErr = null;
+      if ($('emLogo').files[0]) {
+        try { logoUrl = await uploadImage($('emLogo').files[0], 'magazines'); }
+        catch (e) { logoErr = e.message; }
+      }
       const patch = { name: name };
       if (logoUrl) patch.logo_url = logoUrl;
       const r = await sb.from('magazines').update(patch).eq('id', id);
       if (r.error) throw r.error;
-      toast('Magazine updated');
+      toast(logoErr ? 'Saved, but the logo failed to upload: ' + logoErr : 'Magazine updated');
       renderMagsTab();
     } catch (e) { gateMsg('emMsg', 'err', e.message); $('emSave').disabled = false; $('emSave').textContent = 'Save changes'; }
   };
@@ -772,11 +944,12 @@ async function deleteMagazine(id) {
 /* ---------- issues manager ---------- */
 async function showIssuesManager(magId, magName, epoch) {
   epoch = epoch || routeEpoch;
+  curMag = { id: magId, name: magName || curMag.name };
   const body = $('dashBody');
   body.innerHTML =
     '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">' +
       '<button class="btn small ghost" id="backToMags">&larr; Magazines</button>' +
-      '<h2 style="font-size:17px">Issues of ' + esc(magName) + '</h2></div>' +
+      '<h2 style="font-size:17px">Issues of ' + esc(magName || curMag.name) + '</h2></div>' +
     '<div class="formcard"><div id="issueList" class="hint">Loading&#8230;</div>' +
       '<button class="btn block" id="addIssueBtn" style="margin-top:8px">+ Add issue</button><div id="addIssueForm"></div></div>';
   $('backToMags').onclick = () => renderMagsTab();
@@ -792,7 +965,7 @@ async function showIssuesManager(magId, magName, epoch) {
     if (!issues.length) { list.innerHTML = '<p class="hint" style="margin:6px 0 10px">No issues yet. Add the first issue below.</p>'; return; }
     list.innerHTML = issues.map((i) =>
       '<div class="rowitem">' +
-      (i.thumbnail_url ? '<img class="rthumb" src="' + esc(i.thumbnail_url) + '" alt="">' : '<div style="width:56px;height:56px;border-radius:10px;background:#f4f4f4;flex:0 0 56px"></div>') +
+      (i.thumbnail_url ? '<img class="rthumb" src="' + esc(i.thumbnail_url) + '" alt="">' : '<div style="width:56px;height:56px;border-radius:10px;background:#f4f4f4;flex:0 0 56px;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:10px;letter-spacing:.06em">NO COVER</div>') +
       '<div class="grow"><div class="rtitle">' + esc(i.title) + '</div><div class="rsub">' + esc(i.flipbook_url || 'No flipbook link yet') + '</div></div>' +
       '<div class="rowactions">' +
         '<label class="toggle"><input type="checkbox" class="ipubToggle" data-id="' + i.id + '"' + (i.published ? ' checked' : '') + '> Live</label>' +
@@ -826,7 +999,7 @@ function showAddIssueForm(magId) {
   $('addIssueForm').innerHTML =
     '<div class="formcard" style="margin-top:14px"><h3>New issue</h3>' +
     '<label>Issue title</label><input type="text" id="niTitle" placeholder="e.g. January 2026 Edition">' +
-    '<label>Cover thumbnail (image)</label><input type="file" id="niThumb" accept="image/*">' +
+    '<label>Cover image (shown above the issue name; not cropped)</label><input type="file" id="niThumb" accept="image/*">' +
     '<label>Flipbook link</label><input type="url" id="niUrl" placeholder="https://...">' +
     '<div class="hint">Paste the public link of the online flipbook for this issue. Use an https:// link (https links protect your readers).</div>' +
     '<label><span class="toggle" style="margin:0"><input type="checkbox" id="niPub" checked> Visible to the public</span></label>' +
@@ -842,23 +1015,32 @@ async function createIssue(magId) {
   if (!url) return gateMsg('niMsg', 'err', 'Please paste the flipbook link.');
   if (!/^https?:\/\//i.test(url)) return gateMsg('niMsg', 'err', 'The flipbook link must start with http:// or https://');
   $('niSave').disabled = true; $('niSave').textContent = 'Saving&#8230;';
+  let thumbUrl = null, thumbErr = null;
   try {
-    const thumbUrl = await uploadImage($('niThumb').files[0], 'issues');
+    thumbUrl = await uploadImage($('niThumb').files[0], 'issues');
+  } catch (e) { thumbErr = e.message; }
+  try {
     const ins = await sb.from('issues').insert({
       magazine_id: magId, title: title, thumbnail_url: thumbUrl, flipbook_url: url,
       published: $('niPub').checked, sort_order: Date.now() % 100000
     });
     if (ins.error) throw ins.error;
-    toast('Issue published');
-    showIssuesManager(magId, currentMagName(magId));
-  } catch (e) { gateMsg('niMsg', 'err', e.message); $('niSave').disabled = false; $('niSave').textContent = 'Publish issue'; }
+    if (thumbErr) {
+      gateMsg('niMsg', 'err', 'Issue saved, but the cover image failed to upload: ' + thumbErr + ' You can tap Edit on the issue later to add the image.');
+      $('niSave').disabled = false; $('niSave').textContent = 'Publish issue';
+    } else {
+      toast('Issue published');
+      showIssuesManager(magId, curMag.name);
+    }
+  } catch (e) { gateMsg('niMsg', 'err', (thumbErr ? 'Image upload failed: ' + thumbErr + '. ' : '') + e.message); $('niSave').disabled = false; $('niSave').textContent = 'Publish issue'; }
 }
 
 function showEditIssueForm(magId, iss) {
   $('addIssueForm').innerHTML =
     '<div class="formcard" style="margin-top:14px"><h3>Edit issue</h3>' +
+    (iss.thumbnail_url ? '<div class="previewbox"><img src="' + esc(iss.thumbnail_url) + '" style="max-width:40%" alt="cover"></div>' : '') +
     '<label>Issue title</label><input type="text" id="eiTitle" value="' + esc(iss.title) + '">' +
-    '<label>Replace thumbnail (optional)</label><input type="file" id="eiThumb" accept="image/*">' +
+    '<label>Replace cover image (optional)</label><input type="file" id="eiThumb" accept="image/*">' +
     '<label>Flipbook link</label><input type="url" id="eiUrl" value="' + esc(iss.flipbook_url) + '">' +
     '<button class="btn block" id="eiSave" style="margin-top:14px">Save changes</button><div id="eiMsg"></div></div>';
   $('eiSave').onclick = async () => {
@@ -867,14 +1049,22 @@ function showEditIssueForm(magId, iss) {
     if (!title || !url) return gateMsg('eiMsg', 'err', 'Title and flipbook link are required.');
     $('eiSave').disabled = true; $('eiSave').textContent = 'Saving&#8230;';
     try {
-      let thumbUrl = null;
-      if ($('eiThumb').files[0]) thumbUrl = await uploadImage($('eiThumb').files[0], 'issues');
+      let thumbUrl = null, thumbErr = null;
+      if ($('eiThumb').files[0]) {
+        try { thumbUrl = await uploadImage($('eiThumb').files[0], 'issues'); }
+        catch (e) { thumbErr = e.message; }
+      }
       const patch = { title: title, flipbook_url: url };
       if (thumbUrl) patch.thumbnail_url = thumbUrl;
       const r = await sb.from('issues').update(patch).eq('id', iss.id);
       if (r.error) throw r.error;
-      toast('Issue updated');
-      showIssuesManager(magId, currentMagName(magId));
+      if (thumbErr) {
+        gateMsg('eiMsg', 'err', 'Saved, but the new image failed to upload: ' + thumbErr);
+        $('eiSave').disabled = false; $('eiSave').textContent = 'Save changes';
+      } else {
+        toast('Issue updated');
+        showIssuesManager(magId, curMag.name);
+      }
     } catch (e) { gateMsg('eiMsg', 'err', e.message); $('eiSave').disabled = false; $('eiSave').textContent = 'Save changes'; }
   };
   $('eiSave').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -883,23 +1073,34 @@ function showEditIssueForm(magId, iss) {
 async function deleteIssue(magId, id) {
   if (!confirm('Delete this issue? This cannot be undone.')) return;
   const r = await sb.from('issues').delete().eq('id', id);
-  if (r.error) toast(r.error.message); else { toast('Issue deleted.'); showIssuesManager(magId, currentMagName(magId)); }
+  if (r.error) toast(r.error.message); else { toast('Issue deleted.'); showIssuesManager(magId, curMag.name); }
 }
 
-function currentMagName() { return 'magazine'; }
+function currentMagName() { return curMag.name; }
 
 /* ---------- install banner (Android native + iOS guide) ---------- */
 function isStandalone() {
-  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  if (window.navigator.standalone === true) return true;
+  const mm = window.matchMedia;
+  if (!mm) return false;
+  return mm('(display-mode: standalone)').matches ||
+         mm('(display-mode: fullscreen)').matches ||
+         mm('(display-mode: minimal-ui)').matches;
 }
 function isIOS() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
+function installDismissedThisSession() {
+  try { return sessionStorage.getItem('pacInstallDismissed') === '1'; } catch (e) { return false; }
+}
 function maybeShowInstall() {
-  if (isStandalone()) return;
-  if (localStorage.getItem('pacInstallDismissed')) return;
+  if (isStandalone()) return;              // already installed: never show
+  if (installDismissedThisSession()) return;
   if (isIOS()) {
-    if (localStorage.getItem('pacIOSHintShown')) return;
+    let shown = false;
+    try { shown = sessionStorage.getItem('pacIOSHintShown') === '1'; } catch (e) { /* ignore */ }
+    if (shown) return;
+    try { sessionStorage.setItem('pacIOSHintShown', '1'); } catch (e) { /* ignore */ }
     $('installText').textContent = 'Add PAC Media to your home screen: tap the Share button, then "Add to Home Screen".';
     $('installBtn').textContent = 'How';
     $('installBtn').onclick = showIOSModal;
@@ -930,11 +1131,12 @@ function showIOSModal() {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferPrompt = e;
-  if (splashHidden && !isStandalone() && !localStorage.getItem('pacInstallDismissed') && !isIOS()) maybeShowInstall();
+  if (splashHidden && !isStandalone() && !installDismissedThisSession() && !isIOS()) maybeShowInstall();
 });
 $('installDismiss').onclick = () => {
   $('installBanner').hidden = true;
-  localStorage.setItem('pacInstallDismissed', '1');
+  // Session only: closed for now, offered again on the next visit.
+  try { sessionStorage.setItem('pacInstallDismissed', '1'); } catch (e) { /* ignore */ }
 };
 
 /* ---------- service worker ---------- */
