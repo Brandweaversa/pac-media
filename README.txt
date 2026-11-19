@@ -17,19 +17,20 @@ FILES IN THIS FOLDER
   PATCH-NOTES.txt       What changed in this version + how to apply it.
   assets/               (empty - logos are uploaded from the Dashboard)
 
-HOW TO APPLY UPDATE v3 WITH THE PATCH FILE (pac-media-v3.patch)
-  1. Put pac-media-v3.patch inside your project folder
+HOW TO APPLY UPDATE v4 WITH THE PATCH FILE (pac-media-v4.patch)
+  1. Put pac-media-v4.patch inside your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal, run these one at a time:
        git pull
-       git apply pac-media-v3.patch
+       git apply pac-media-v4.patch
        git add .
-       git commit -m "v3: Inter font, splash logo fix, red logo tiles"
+       git commit -m "v4: strip on all pages, logo tiles, banner fixes"
        git push
-  3. Supabase > SQL Editor > New query > paste the whole
-     database-update.sql > Run (adds the new settings columns -
-     without this the logo style settings cannot save).
-  4. Reload the app on your phone twice.
+  3. Reload the app on your phone twice (first load fetches the new
+     version, the second shows it).
+  4. If you have not run database-update.sql in the Supabase SQL
+     Editor yet, run it once - it unlocks the logo style settings
+     and locks the database to your admin account only.
   NOTE: the patch never touches config.js, so your keys stay safe.
   icons/                App icons shown on phone home screens.
 

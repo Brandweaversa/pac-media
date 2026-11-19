@@ -14,7 +14,7 @@
 alter table public.app_settings add column if not exists square_logo_url text;
 alter table public.app_settings add column if not exists mag_logo_radius int not null default 16;
 alter table public.app_settings add column if not exists mag_logo_border_w int not null default 2;
-alter table public.app_settings add column if not exists mag_logo_border_color text not null default '#FFFFFF';
+alter table public.app_settings add column if not exists mag_logo_border_color text not null default '#C8102E';
 
 -- ---------- 2. Admin check helper (needed by the policies below) ----------
 create or replace function public.is_pac_admin()

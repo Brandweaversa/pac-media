@@ -19,7 +19,7 @@ create table if not exists public.app_settings (
   square_logo_url text,
   mag_logo_radius int not null default 16,
   mag_logo_border_w int not null default 2,
-  mag_logo_border_color text not null default '#FFFFFF',
+  mag_logo_border_color text not null default '#C8102E',
   footer_text text not null default 'A Digital Publishing Platform by Pigeon Advertising & Communications.',
   updated_at timestamptz not null default now()
 );

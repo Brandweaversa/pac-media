@@ -1,75 +1,79 @@
-PAC MEDIA - UPDATE v3 (November 2026) - PATCH NOTES
+PAC MEDIA - UPDATE v4 (November 2026) - PATCH NOTES
 ===================================================
 
-HOW TO APPLY (git patch - no file replacing needed)
-  1. Save pac-media-v3.patch into your project folder
+HOW TO APPLY (git patch)
+  1. Save pac-media-v4.patch into your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal:
        git pull
-       git apply pac-media-v3.patch
+       git apply pac-media-v4.patch
        git add .
-       git commit -m "v3: Inter font, splash logo fix, red logo tiles"
+       git commit -m "v4: strip on all pages, logo tiles, banner fixes"
        git push
-  3. Supabase Dashboard > SQL Editor > New query > paste the whole
-     database-update.sql > Run.  <<< THIS IS THE STEP THAT FIXES
-     "The database is missing the new settings columns"
-  4. Reload the app on your phone twice (first load fetches the new
-     version, second shows it).
+  3. Reload the app on your phone twice (first load fetches the new
+     version, the second shows it).
+  4. If you have not run database-update.sql in the Supabase SQL
+     Editor yet, run it once. It unlocks the logo style settings and
+     locks the database to your admin account only.
 
   The patch does NOT touch config.js - your keys stay as they are.
 
-WHAT'S NEW IN v3
+WHAT'S FIXED IN v4
 
-  Professional look - Inter font
-  - The entire app now uses Inter (the font used by modern apps like
-    Vercel and GitHub), with softer shadows, rounded buttons that
-    respond to touch, and a subtle fade-in on every screen.
+  Red strip with the small square logo - on EVERY page
+  - The red strip with your small logo now appears at the top of all
+    inside pages: the magazine hub, every magazine page, every issue
+    reader, the admin sign-in and the dashboard. If you have not
+    uploaded a separate square logo, your main logo is used there.
 
-  Splash screen - text placeholder removed completely
-  - The built-in "PAC" text placeholder logo no longer exists in the
-    app. The splash shows ONLY your uploaded logo (loaded from your
-    database, remembered on the phone so it appears instantly).
-    Before the logo arrives the splash is simply the red screen.
-  - assets/pac-logo.png has been deleted from the project.
+  "PAC MEDIA" text heading removed
+  - The text heading is gone; your logo on the red strip identifies
+    the app now.
 
-  Magazine hub - red tiles
-  - Every magazine now sits on a RED TILE (your brand red) with its
-    logo centered on it - this is why logos that are white or light
-    (like your Travel Passport logo, which is tan on transparency)
-    finally show up properly instead of disappearing into the white
-    background or showing as text.
-  - A magazine without a logo shows its name in white on the red tile.
-  - The magazine page shows the same red tile.
-  - Rounded corners, border thickness and border color are still
-    controlled in Dashboard > Branding > Magazine logos (border now
-    defaults to white, which frames the red tile).
+  Red background removed from magazine logos
+  - Magazine logos sit directly on the page again (hub and magazine
+    pages). No red tile behind them.
+  - The rounded border settings still work: corners, thickness and
+    color (border color default is back to your brand red).
+  - A magazine without a logo shows its name in red text instead.
 
-  Install banner
-  - Once the app has been installed (opened from the home screen
-    icon) even once, the banner never appears again on that device -
-    not in the installed app and not in the browser.
-  - The X button still closes it for the current visit, and it is
-    offered again on the next visit until installed.
+  Install banner - actually working now
+  - Root cause found: a CSS rule was overriding the "hidden" switch,
+    so the banner could never really disappear - that is why closing
+    it did nothing, why Install "did nothing" (the banner just stayed
+    on screen), and why it still showed inside the installed app.
+  - Fixed everywhere: the X now closes it (until the next visit),
+    Install pops up the real Android install dialog, and once the app
+    has been installed even once the banner never appears again -
+    not in the installed app, not in the browser.
+  - If the browser cannot offer the one-tap install dialog, the
+    Install button now opens clear step-by-step instructions instead
+    of doing nothing.
 
-  Settings that could not save - fixed two ways
-  - The database update (step 3 above) adds the missing columns, so
-    all logo style settings save normally.
-  - Until the update is run, the app now saves what it can (the logo
-    width) and clearly tells you what still needs the database update,
-    instead of failing the whole save.
+  Issue reader - "Still loading" stuck forever - fixed
+  - Same CSS root cause: the "Loading magazine..." cover refused to
+    disappear even after the flipbook had loaded, hiding it. It now
+    disappears the moment the magazine is ready, and if the host
+    blocks embedding the "Open Flipbook" hint appears as designed.
+  - Also fixed the raw "&#8230;" text you saw - all "..." texts now
+    render properly.
 
-  Security hardening (in database-update.sql)
-  - An older repair script had allowed ANY signed-in account to edit
-    magazines and issues. The database update now locks writes to your
-    administrator account only. Reading stays public.
+  Splash screen glitch when you change the logo size - fixed
+  - The app now remembers ALL branding settings on the phone and
+    applies them before the first paint, so the splash logo no longer
+    resizes mid-load. The splash logo's height setting is now
+    honoured as well (width and height reserve the exact space).
 
-  Also in v3 (carried from v2)
-  - Issue covers displayed uncropped on top of the issue name, the
-    issue page shows the cover, "Open Flipbook" button, swipe between
-    screens, footer pinned just above the bottom navigation, upload
-    errors no longer lose your data.
+  Under the hood
+  - Service worker cache bumped to v4 (so every device picks this up
+    with two reloads).
+  - database-update.sql border default returned to brand red #C8102E
+    to match the new logo look (safe to re-run).
 
-IF THE LOGO STYLE SETTINGS STILL SAY "database is missing columns"
-  database-update.sql has not run yet on your Supabase project.
-  Supabase Dashboard > SQL Editor > New query > paste the whole file
-  > Run. It is safe to run it any number of times.
+ALSO IN THIS BUILD (from v3, if you applied it)
+  - Inter font across the whole app with a professional polish.
+  - Splash shows only your uploaded logo - the built-in placeholder
+    was removed from the project entirely.
+  - Graceful saves: if the database update has not run yet, the logo
+    width still saves and the app clearly says what needs the update.
+  - Security: only your administrator account can change content.

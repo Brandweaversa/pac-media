@@ -1,0 +1,621 @@
+diff --git a/PATCH-NOTES.txt b/PATCH-NOTES.txt
+index f533a62..b48951f 100644
+--- a/PATCH-NOTES.txt
++++ b/PATCH-NOTES.txt
+@@ -1,75 +1,79 @@
+-PAC MEDIA - UPDATE v3 (November 2026) - PATCH NOTES
++PAC MEDIA - UPDATE v4 (November 2026) - PATCH NOTES
+ ===================================================
+ 
+-HOW TO APPLY (git patch - no file replacing needed)
+-  1. Save pac-media-v3.patch into your project folder
++HOW TO APPLY (git patch)
++  1. Save pac-media-v4.patch into your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal:
+        git pull
+-       git apply pac-media-v3.patch
++       git apply pac-media-v4.patch
+        git add .
+-       git commit -m "v3: Inter font, splash logo fix, red logo tiles"
++       git commit -m "v4: strip on all pages, logo tiles, banner fixes"
+        git push
+-  3. Supabase Dashboard > SQL Editor > New query > paste the whole
+-     database-update.sql > Run.  <<< THIS IS THE STEP THAT FIXES
+-     "The database is missing the new settings columns"
+-  4. Reload the app on your phone twice (first load fetches the new
+-     version, second shows it).
++  3. Reload the app on your phone twice (first load fetches the new
++     version, the second shows it).
++  4. If you have not run database-update.sql in the Supabase SQL
++     Editor yet, run it once. It unlocks the logo style settings and
++     locks the database to your admin account only.
+ 
+   The patch does NOT touch config.js - your keys stay as they are.
+ 
+-WHAT'S NEW IN v3
++WHAT'S FIXED IN v4
+ 
+-  Professional look - Inter font
+-  - The entire app now uses Inter (the font used by modern apps like
+-    Vercel and GitHub), with softer shadows, rounded buttons that
+-    respond to touch, and a subtle fade-in on every screen.
++  Red strip with the small square logo - on EVERY page
++  - The red strip with your small logo now appears at the top of all
++    inside pages: the magazine hub, every magazine page, every issue
++    reader, the admin sign-in and the dashboard. If you have not
++    uploaded a separate square logo, your main logo is used there.
+ 
+-  Splash screen - text placeholder removed completely
+-  - The built-in "PAC" text placeholder logo no longer exists in the
+-    app. The splash shows ONLY your uploaded logo (loaded from your
+-    database, remembered on the phone so it appears instantly).
+-    Before the logo arrives the splash is simply the red screen.
+-  - assets/pac-logo.png has been deleted from the project.
++  "PAC MEDIA" text heading removed
++  - The text heading is gone; your logo on the red strip identifies
++    the app now.
+ 
+-  Magazine hub - red tiles
+-  - Every magazine now sits on a RED TILE (your brand red) with its
+-    logo centered on it - this is why logos that are white or light
+-    (like your Travel Passport logo, which is tan on transparency)
+-    finally show up properly instead of disappearing into the white
+-    background or showing as text.
+-  - A magazine without a logo shows its name in white on the red tile.
+-  - The magazine page shows the same red tile.
+-  - Rounded corners, border thickness and border color are still
+-    controlled in Dashboard > Branding > Magazine logos (border now
+-    defaults to white, which frames the red tile).
++  Red background removed from magazine logos
++  - Magazine logos sit directly on the page again (hub and magazine
++    pages). No red tile behind them.
++  - The rounded border settings still work: corners, thickness and
++    color (border color default is back to your brand red).
++  - A magazine without a logo shows its name in red text instead.
+ 
+-  Install banner
+-  - Once the app has been installed (opened from the home screen
+-    icon) even once, the banner never appears again on that device -
+-    not in the installed app and not in the browser.
+-  - The X button still closes it for the current visit, and it is
+-    offered again on the next visit until installed.
++  Install banner - actually working now
++  - Root cause found: a CSS rule was overriding the "hidden" switch,
++    so the banner could never really disappear - that is why closing
++    it did nothing, why Install "did nothing" (the banner just stayed
++    on screen), and why it still showed inside the installed app.
++  - Fixed everywhere: the X now closes it (until the next visit),
++    Install pops up the real Android install dialog, and once the app
++    has been installed even once the banner never appears again -
++    not in the installed app, not in the browser.
++  - If the browser cannot offer the one-tap install dialog, the
++    Install button now opens clear step-by-step instructions instead
++    of doing nothing.
+ 
+-  Settings that could not save - fixed two ways
+-  - The database update (step 3 above) adds the missing columns, so
+-    all logo style settings save normally.
+-  - Until the update is run, the app now saves what it can (the logo
+-    width) and clearly tells you what still needs the database update,
+-    instead of failing the whole save.
++  Issue reader - "Still loading" stuck forever - fixed
++  - Same CSS root cause: the "Loading magazine..." cover refused to
++    disappear even after the flipbook had loaded, hiding it. It now
++    disappears the moment the magazine is ready, and if the host
++    blocks embedding the "Open Flipbook" hint appears as designed.
++  - Also fixed the raw "&#8230;" text you saw - all "..." texts now
++    render properly.
+ 
+-  Security hardening (in database-update.sql)
+-  - An older repair script had allowed ANY signed-in account to edit
+-    magazines and issues. The database update now locks writes to your
+-    administrator account only. Reading stays public.
++  Splash screen glitch when you change the logo size - fixed
++  - The app now remembers ALL branding settings on the phone and
++    applies them before the first paint, so the splash logo no longer
++    resizes mid-load. The splash logo's height setting is now
++    honoured as well (width and height reserve the exact space).
+ 
+-  Also in v3 (carried from v2)
+-  - Issue covers displayed uncropped on top of the issue name, the
+-    issue page shows the cover, "Open Flipbook" button, swipe between
+-    screens, footer pinned just above the bottom navigation, upload
+-    errors no longer lose your data.
++  Under the hood
++  - Service worker cache bumped to v4 (so every device picks this up
++    with two reloads).
++  - database-update.sql border default returned to brand red #C8102E
++    to match the new logo look (safe to re-run).
+ 
+-IF THE LOGO STYLE SETTINGS STILL SAY "database is missing columns"
+-  database-update.sql has not run yet on your Supabase project.
+-  Supabase Dashboard > SQL Editor > New query > paste the whole file
+-  > Run. It is safe to run it any number of times.
++ALSO IN THIS BUILD (from v3, if you applied it)
++  - Inter font across the whole app with a professional polish.
++  - Splash shows only your uploaded logo - the built-in placeholder
++    was removed from the project entirely.
++  - Graceful saves: if the database update has not run yet, the logo
++    width still saves and the app clearly says what needs the update.
++  - Security: only your administrator account can change content.
+diff --git a/README.txt b/README.txt
+index 7f64149..c4908b7 100644
+--- a/README.txt
++++ b/README.txt
+@@ -17,19 +17,20 @@ FILES IN THIS FOLDER
+   PATCH-NOTES.txt       What changed in this version + how to apply it.
+   assets/               (empty - logos are uploaded from the Dashboard)
+ 
+-HOW TO APPLY UPDATE v3 WITH THE PATCH FILE (pac-media-v3.patch)
+-  1. Put pac-media-v3.patch inside your project folder
++HOW TO APPLY UPDATE v4 WITH THE PATCH FILE (pac-media-v4.patch)
++  1. Put pac-media-v4.patch inside your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal, run these one at a time:
+        git pull
+-       git apply pac-media-v3.patch
++       git apply pac-media-v4.patch
+        git add .
+-       git commit -m "v3: Inter font, splash logo fix, red logo tiles"
++       git commit -m "v4: strip on all pages, logo tiles, banner fixes"
+        git push
+-  3. Supabase > SQL Editor > New query > paste the whole
+-     database-update.sql > Run (adds the new settings columns -
+-     without this the logo style settings cannot save).
+-  4. Reload the app on your phone twice.
++  3. Reload the app on your phone twice (first load fetches the new
++     version, the second shows it).
++  4. If you have not run database-update.sql in the Supabase SQL
++     Editor yet, run it once - it unlocks the logo style settings
++     and locks the database to your admin account only.
+   NOTE: the patch never touches config.js, so your keys stay safe.
+   icons/                App icons shown on phone home screens.
+ 
+diff --git a/database-update.sql b/database-update.sql
+index ba5db9c..2639758 100644
+--- a/database-update.sql
++++ b/database-update.sql
+@@ -14,7 +14,7 @@
+ alter table public.app_settings add column if not exists square_logo_url text;
+ alter table public.app_settings add column if not exists mag_logo_radius int not null default 16;
+ alter table public.app_settings add column if not exists mag_logo_border_w int not null default 2;
+-alter table public.app_settings add column if not exists mag_logo_border_color text not null default '#FFFFFF';
++alter table public.app_settings add column if not exists mag_logo_border_color text not null default '#C8102E';
+ 
+ -- ---------- 2. Admin check helper (needed by the policies below) ----------
+ create or replace function public.is_pac_admin()
+diff --git a/index.html b/index.html
+index 5979227..32f534f 100644
+--- a/index.html
++++ b/index.html
+@@ -20,7 +20,8 @@
+ <script src="config.js"></script>
+ <style>
+ *{box-sizing:border-box;margin:0;padding:0}
+-:root{--red:#C8102E;--ink:#141414;--muted:#6b6b6b;--line:#e7e7e7;--bg:#ffffff;--splash-w:327px;--hub-w:260px;--mag-radius:16px;--mag-bw:2px;--mag-bc:#FFFFFF;--nav-h:58px;--foot-h:48px}
++[hidden]{display:none!important}
++:root{--red:#C8102E;--ink:#141414;--muted:#6b6b6b;--line:#e7e7e7;--bg:#ffffff;--splash-w:327px;--splash-h:239px;--hub-w:260px;--mag-radius:16px;--mag-bw:2px;--mag-bc:#C8102E;--nav-h:58px;--foot-h:48px}
+ html{-webkit-tap-highlight-color:transparent}
+ html,body{height:100%}
+ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;letter-spacing:.01em}
+@@ -31,7 +32,7 @@ button{font:inherit;cursor:pointer;-webkit-user-select:none;user-select:none}
+ /* Splash */
+ #splash{position:fixed;inset:0;background:var(--red);display:flex;align-items:center;justify-content:center;z-index:100;transition:opacity .55s ease}
+ #splash.gone{opacity:0;pointer-events:none}
+-#splashLogo{width:min(var(--splash-w),84vw);height:auto;opacity:0}
++#splashLogo{width:min(var(--splash-w),84vw);height:min(var(--splash-h),70vh);object-fit:contain;opacity:0}
+ #splashLogo.ready{opacity:1;animation:logoIn .45s ease}
+ @keyframes logoIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+ #splashFooter{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;color:#fff;font-size:11px;opacity:.92;padding:0 16px;line-height:1.5;letter-spacing:.02em}
+@@ -44,9 +45,7 @@ button{font:inherit;cursor:pointer;-webkit-user-select:none;user-select:none}
+ body.readerview #view{padding-bottom:0}
+ footer.pagefoot{position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);text-align:center;font-size:11px;color:var(--muted);padding:8px 16px;line-height:1.5;z-index:49;letter-spacing:.02em}
+ 
+-/* Top bar / brand */
+-.topbar{padding:30px 20px 0;text-align:center}
+-.brand{font-weight:800;letter-spacing:.18em;font-size:clamp(15px,4vw,19px);text-transform:uppercase}
++/* Red accent dash under logos */
+ .reddash{width:42px;height:4px;background:var(--red);border-radius:2px;margin:10px auto 0}
+ 
+ /* Red strip with small square logo (inside pages) */
+@@ -57,10 +56,10 @@ footer.pagefoot{position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(saf
+ .stack{display:flex;flex-direction:column;align-items:center;gap:30px;padding:44px 22px 10px;max-width:680px;margin:0 auto}
+ .hub-logo{display:block}
+ .hub-logo:active{opacity:1}
+-.mag-tile{display:flex;align-items:center;justify-content:center;background:var(--red);border-radius:var(--mag-radius);border:var(--mag-bw) solid var(--mag-bc);padding:26px 30px;min-height:104px;transition:transform .15s ease,opacity .15s ease;box-shadow:0 4px 14px rgba(16,16,16,.10)}
++.mag-tile{display:flex;align-items:center;justify-content:center;border-radius:var(--mag-radius);border:var(--mag-bw) solid var(--mag-bc);padding:26px 30px;min-height:104px;transition:transform .15s ease,opacity .15s ease}
+ .hub-logo:active .mag-tile{transform:scale(.98);opacity:.92}
+ .mag-tile img{width:min(var(--hub-w),68vw);height:auto}
+-.tile-name{color:#fff;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:16px;text-align:center;line-height:1.4}
++.tile-name{color:var(--red);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:16px;text-align:center;line-height:1.4}
+ 
+ /* Bottom nav */
+ #bottomNav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;gap:56px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));z-index:50;box-shadow:0 -6px 20px rgba(0,0,0,.06)}
+@@ -158,7 +157,7 @@ input[type=color]{width:52px;height:40px;border:1px solid #d6d6d6;border-radius:
+ /* Toast */
+ #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + var(--foot-h) + 16px + env(safe-area-inset-bottom,0px));background:#111;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;z-index:80;max-width:88vw;text-align:center}
+ 
+-/* Modal (iOS install steps) */
++/* Modal (install steps) */
+ .modal-back{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px}
+ .modal{background:#fff;border-radius:16px;max-width:400px;width:100%;padding:22px}
+ .modal h3{font-size:16px;margin-bottom:10px;font-weight:800}
+@@ -215,7 +214,7 @@ const DEFAULTS = {
+   square_logo_url: '',
+   mag_logo_radius: 16,
+   mag_logo_border_w: 2,
+-  mag_logo_border_color: '#FFFFFF',
++  mag_logo_border_color: '#C8102E',
+   footer_text: 'A Digital Publishing Platform by Pigeon Advertising & Communications.',
+   admin_created: false,
+   admin_user_id: null
+@@ -266,11 +265,29 @@ function setSplashLogo(url) {
+   return splashLogoPromise;
+ }
+ 
++/* ---------- branding cache (kills the mid-splash logo resize glitch) ---------- */
++const BRANDING_KEY = 'pacBranding';
++function cacheBranding() {
++  try { localStorage.setItem(BRANDING_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ }
++}
++function loadCachedBranding() {
++  try {
++    const c = localStorage.getItem(BRANDING_KEY);
++    if (c) {
++      const o = JSON.parse(c);
++      if (o && typeof o === 'object') { S = Object.assign({}, DEFAULTS, o); return; }
++    }
++    const legacy = localStorage.getItem('pacLogoUrl');  // pre-v4 cache
++    if (legacy) S.logo_url = legacy;
++  } catch (e) { /* ignore */ }
++}
++
+ /* ---------- theme / footer ---------- */
+ function applyTheme() {
+   const root = document.documentElement;
+   root.style.setProperty('--red', S.brand_red || DEFAULTS.brand_red);
+   root.style.setProperty('--splash-w', (num(S.splash_logo_w, 327)) + 'px');
++  root.style.setProperty('--splash-h', (num(S.splash_logo_h, 239)) + 'px');
+   root.style.setProperty('--hub-w', (num(S.hub_logo_w, 260)) + 'px');
+   root.style.setProperty('--mag-radius', clamp(num(S.mag_logo_radius, 16), 0, 80) + 'px');
+   root.style.setProperty('--mag-bw', clamp(num(S.mag_logo_border_w, 2), 0, 12) + 'px');
+@@ -280,6 +297,7 @@ function applyTheme() {
+   setSplashLogo(S.logo_url || '');
+   $('splashFooter').textContent = footerText();
+   $('pageFooter').textContent = footerText();
++  cacheBranding();
+ }
+ function squareLogoSrc() { return S.square_logo_url || S.logo_url || ''; }
+ function squareLogoHTML() {
+@@ -297,8 +315,9 @@ function toast(msg) {
+ /* ---------- boot (splash -> app) ---------- */
+ async function boot() {
+   const t0 = Date.now();
+-  // Show last-known logo instantly (before any network round trip)
+-  try { const c = localStorage.getItem('pacLogoUrl'); if (c) S.logo_url = c; } catch (e) { /* ignore */ }
++  // Restore last-known branding synchronously, so the very first paint
++  // already uses the final logo size (no resize glitch mid-splash).
++  loadCachedBranding();
+   if (isStandalone()) markInstalledFlag();
+   applyTheme();
+   let ok = false;
+@@ -311,11 +330,7 @@ async function boot() {
+       ok = true;
+     }
+   } catch (e) { console.warn('boot data load failed', e); }
+-  try {
+-    if (ok && S.logo_url) localStorage.setItem('pacLogoUrl', S.logo_url);
+-    else localStorage.removeItem('pacLogoUrl');
+-  } catch (e) { /* ignore */ }
+-  applyTheme();
++  applyTheme();  // also refreshes the branding cache
+   try { await splashLogoPromise; } catch (e) { /* ignore */ }
+   await sleep(Math.max(0, 1700 - (Date.now() - t0)));  // splash every launch, ~1.7s
+   $('splash').classList.add('gone');
+@@ -342,11 +357,11 @@ function route() {
+   let after = null;
+   document.body.classList.toggle('readerview', parts[0] === 'read');
+   if (parts[0] === 'pac-admin') {
+-    view.innerHTML = '<div id="adminGate"></div>';
++    view.innerHTML = stripHTML() + '<div id="adminGate"></div>';
+     after = renderAdminGate;
+   } else if (parts[0] === 'dashboard') {
+     if (!session) { location.hash = '#/pac-admin'; return; }
+-    view.innerHTML = '<div class="dashwrap" id="dash"></div>';
++    view.innerHTML = stripHTML() + '<div class="dashwrap" id="dash"></div>';
+     after = renderDashboard;
+   } else if (parts[0] === 'magazine' && parts[1]) {
+     view.innerHTML = '<div id="mag"></div>';
+@@ -403,8 +418,9 @@ function renderNav(active) {
+ }
+ 
+ /* ---------- shared views ---------- */
+-function topbarHTML() {
+-  return '<div class="topbar"><div class="brand">' + esc(S.app_name) + '</div><div class="reddash"></div></div>';
++/* Red strip with the small square logo - sits at the top of every inside page */
++function stripHTML() {
++  return '<div class="redstrip">' + squareLogoHTML() + '</div>';
+ }
+ function needConfig() {
+   return '<div class="empty"><div class="card"><h3>Almost there</h3><p>This app is not connected to its database yet. Open <b>config.js</b> and paste your Supabase <b>Project URL</b> and <b>anon public key</b> (Setup Guide, Steps 6-7), then redeploy.</p></div></div>';
+@@ -427,7 +443,7 @@ async function renderHub(epoch) {
+         .order('sort_order', { ascending: true }).order('created_at', { ascending: true });
+       if (r.error) throw r.error;
+       mags = r.data || [];
+-    } catch (e) { if (epoch !== routeEpoch) return; box.innerHTML = topbarHTML() + errView(e.message); return; }
++    } catch (e) { if (epoch !== routeEpoch) return; box.innerHTML = stripHTML() + errView(e.message); return; }
+   }
+   if (epoch !== routeEpoch) return;
+   const stack = mags.length
+@@ -438,7 +454,7 @@ async function renderHub(epoch) {
+     : '<div class="empty" style="margin:10px auto 0"><div class="card"><h3>No magazines yet</h3><p>' +
+       (cfgReady() ? 'Sign in to the Dashboard to publish your first magazine.' : 'Connect Supabase in config.js (Setup Guide, Steps 6-7) to go live.') +
+       '</p></div></div>';
+-  box.innerHTML = topbarHTML() + '<div class="stack">' + stack + '</div>';
++  box.innerHTML = stripHTML() + '<div class="stack">' + stack + '</div>';
+ }
+ 
+ /* ---------- magazine page ---------- */
+@@ -453,7 +469,7 @@ function issueCard(i) {
+ }
+ async function renderMagazine(slug, epoch) {
+   const box = $('mag');
+-  if (!cfgReady()) { box.innerHTML = needConfig(); return; }
++  if (!cfgReady()) { box.innerHTML = stripHTML() + needConfig(); return; }
+   try {
+     const m = await sb.from('magazines').select('*').eq('slug', slug).maybeSingle();
+     if (epoch !== routeEpoch) return;
+@@ -480,13 +496,13 @@ async function renderMagazine(slug, epoch) {
+       '</span>' +
+       '<div class="reddash"></div><div class="mag-name">' + esc(mag.name) + '</div></div>' +
+       '<div class="issues">' + cards + '</div>';
+-  } catch (e) { box.innerHTML = errView(e.message); }
++  } catch (e) { box.innerHTML = stripHTML() + errView(e.message); }
+ }
+ 
+ /* ---------- flipbook reader (hybrid embed + fallback) ---------- */
+ async function renderReader(id, epoch) {
+   const box = $('reader');
+-  if (!cfgReady()) { box.innerHTML = needConfig(); return; }
++  if (!cfgReady()) { box.innerHTML = stripHTML() + needConfig(); return; }
+   try {
+     const r = await sb.from('issues').select('*, magazines(name,slug)').eq('id', id).maybeSingle();
+     if (epoch !== routeEpoch) return;
+@@ -517,9 +533,9 @@ async function renderReader(id, epoch) {
+     const fr = $('flipFrame'), fl = $('frameLoading'), fh = $('frameHint');
+     let loaded = false;
+     fr.addEventListener('load', () => { loaded = true; fl.hidden = true; });
+-    setTimeout(() => { if (!loaded) fl.textContent = 'Still loading&#8230;'; }, 2600);
++    setTimeout(() => { if (!loaded) fl.textContent = 'Still loading…'; }, 2600);
+     setTimeout(() => { if (!loaded) fh.hidden = false; }, 4500);
+-  } catch (e) { box.innerHTML = errView(e.message); }
++  } catch (e) { box.innerHTML = stripHTML() + errView(e.message); }
+ }
+ /* ---------- admin gate: one-time setup, then private login ---------- */
+ function gateCard(inner, formHTML) {
+@@ -591,7 +607,7 @@ async function doSignup() {
+   if (!email || !p1 || !p2) return gateMsg('suMsg', 'err', 'Please fill in every field.');
+   if (p1.length < 8) return gateMsg('suMsg', 'err', 'Password must be at least 8 characters.');
+   if (p1 !== p2) return gateMsg('suMsg', 'err', 'The two passwords do not match.');
+-  $('suBtn').disabled = true; $('suBtn').textContent = 'Creating&#8230;';
++  $('suBtn').disabled = true; $('suBtn').textContent = 'Creating…';
+   try {
+     const r = await sb.auth.signUp({ email: email, password: p1 });
+     if (r.error) throw r.error;
+@@ -625,7 +641,7 @@ async function finalizeSetup(quiet) {
+ async function doLogin() {
+   const email = $('liEmail').value.trim(), pass = $('liPass').value;
+   if (!email || !pass) return gateMsg('liMsg', 'err', 'Please enter your email and password.');
+-  $('liBtn').disabled = true; $('liBtn').textContent = 'Signing in&#8230;';
++  $('liBtn').disabled = true; $('liBtn').textContent = 'Signing in…';
+   try {
+     const r = await sb.auth.signInWithPassword({ email: email, password: pass });
+     if (r.error) throw r.error;
+@@ -711,7 +727,7 @@ function renderBrandingTab() {
+     ? '<img src="' + esc(squareLogoSrc()) + '" alt="square logo">'
+     : '<div class="nopreview">Nothing uploaded yet &#8212; the strip will be plain red</div>';
+   const magLogoPrev = S.logo_url
+-    ? '<img id="magLogoPreview" src="' + esc(S.logo_url) + '" style="border-radius:' + esc(clamp(num(S.mag_logo_radius, 16), 0, 80)) + 'px;border:' + esc(clamp(num(S.mag_logo_border_w, 2), 0, 12)) + 'px solid ' + esc(S.mag_logo_border_color || '#FFFFFF') + ';width:min(200px,60%)" alt="preview">'
++    ? '<img id="magLogoPreview" src="' + esc(S.logo_url) + '" style="border-radius:' + esc(clamp(num(S.mag_logo_radius, 16), 0, 80)) + 'px;border:' + esc(clamp(num(S.mag_logo_border_w, 2), 0, 12)) + 'px solid ' + esc(S.mag_logo_border_color || '#C8102E') + ';width:min(200px,60%)" alt="preview">'
+     : '<div class="nopreview">Upload a logo first &#8212; the border preview will appear here</div>';
+   body.innerHTML =
+     '<div class="formcard"><h3>Splash &amp; branding</h3>' +
+@@ -719,10 +735,10 @@ function renderBrandingTab() {
+       '<div class="hint">Shown at the top of the magazine hub and in the browser tab.</div>' +
+       '<label>Brand red</label><div class="colorrow"><input type="color" id="fRed" value="' + esc(S.brand_red) + '">' +
+       '<input type="text" id="fRedHex" value="' + esc(S.brand_red) + '" style="max-width:140px"></div>' +
+-      '<div class="hint">Used for the splash screen, the red tiles and strip, buttons and accents. Default #C8102E.</div>' +
++      '<div class="hint">Used for the splash screen, the red strip, buttons and accents. Default #C8102E.</div>' +
+       '<label>Splash logo width (px)</label><input type="number" id="fSplashW" min="80" max="600" value="' + esc(S.splash_logo_w) + '">' +
+       '<label>Splash logo height (px)</label><input type="number" id="fSplashH" min="60" max="600" value="' + esc(S.splash_logo_h) + '">' +
+-      '<div class="hint">Your logo is 327 wide x 239 high. The height keeps the logo&#8217;s proportions on small screens automatically.</div>' +
++      '<div class="hint">Width and height reserve the exact space for the logo on the splash screen, so nothing resizes while it loads.</div>' +
+       '<label>Footer text</label><textarea id="fFooter" rows="2">' + esc(S.footer_text) + '</textarea>' +
+       '<div class="hint">Shown just above the bottom navigation on every screen. The app adds &quot;Copyright ' + YEAR + '.&quot; (current year, auto-updating) in front of it.</div>' +
+       '<button class="btn block" id="saveBranding" style="margin-top:18px">Save branding</button>' +
+@@ -737,19 +753,19 @@ function renderBrandingTab() {
+     '</div>' +
+     '<div class="formcard"><h3>Small square logo (inside pages)</h3>' +
+       '<div class="previewbox red">' + sqLogoPrev + '</div>' +
+-      '<div class="hint">This small logo sits centered on the red strip at the top of the magazine and issue pages. If you don&#8217;t upload one, the app uses your main logo.</div>' +
++      '<div class="hint">This small logo sits centered on the red strip at the top of every page of the app: the hub, magazine pages, issues and the dashboard. If you don&#8217;t upload one, the app uses your main logo.</div>' +
+       '<label>Upload small square logo</label><input type="file" id="fSqLogo" accept="image/*">' +
+       '<button class="btn block" id="uploadSqLogo" style="margin-top:14px">Upload square logo</button>' +
+       '<div id="sqLogoMsg"></div>' +
+     '</div>' +
+     '<div class="formcard"><h3>Magazine logos (hub &amp; magazine pages)</h3>' +
+-      '<div class="hint" style="margin:0 0 4px">Every magazine now sits on a red tile. These settings control the logo size and the tile&#8217;s rounded border.</div>' +
++      '<div class="hint" style="margin:0 0 4px">Magazine logos sit directly on the page. These settings control their size and their rounded border.</div>' +
+       '<label>Magazine logo width (px)</label><input type="number" id="fHubW" min="80" max="600" value="' + esc(S.hub_logo_w) + '">' +
+-      '<div class="hint">Width of every magazine logo inside its red tile. Height keeps the logo&#8217;s own proportions.</div>' +
++      '<div class="hint">Width of every magazine logo. Height keeps the logo&#8217;s own proportions.</div>' +
+       '<label>Rounded border radius (px)</label><input type="number" id="fMagR" min="0" max="80" value="' + esc(S.mag_logo_radius) + '">' +
+       '<div class="hint">0 = square corners. Higher numbers = rounder corners.</div>' +
+       '<label>Border thickness (px)</label><input type="number" id="fMagBW" min="0" max="12" value="' + esc(S.mag_logo_border_w) + '">' +
+-      '<div class="hint">0 = no border around the red tile.</div>' +
++      '<div class="hint">0 = no border around the logo.</div>' +
+       '<label>Border color</label><div class="colorrow"><input type="color" id="fMagBC" value="' + esc(S.mag_logo_border_color) + '">' +
+       '<input type="text" id="fMagBCHex" value="' + esc(S.mag_logo_border_color) + '" style="max-width:140px"></div>' +
+       '<div class="previewbox">' + magLogoPrev + '</div>' +
+@@ -766,7 +782,7 @@ function renderBrandingTab() {
+     if (!p) return;
+     const r = clamp(num($('fMagR').value, 16), 0, 80);
+     const w = clamp(num($('fMagBW').value, 2), 0, 12);
+-    const c = /^#[0-9a-fA-F]{6}$/.test(bcHex.value) ? bcHex.value : (bc.value || '#FFFFFF');
++    const c = /^#[0-9a-fA-F]{6}$/.test(bcHex.value) ? bcHex.value : (bc.value || '#C8102E');
+     p.style.borderRadius = r + 'px';
+     p.style.borderWidth = w + 'px';
+     p.style.borderColor = c;
+@@ -825,7 +841,7 @@ function renderBrandingTab() {
+   $('uploadLogo').onclick = async () => {
+     const f = $('fLogo').files[0];
+     if (!f) return gateMsg('logoMsg', 'err', 'Choose an image file first.');
+-    $('uploadLogo').disabled = true; $('uploadLogo').textContent = 'Uploading&#8230;';
++    $('uploadLogo').disabled = true; $('uploadLogo').textContent = 'Uploading…';
+     try {
+       const url = await uploadImage(f, 'branding');
+       if (!url) throw new Error('Upload failed.');
+@@ -840,7 +856,7 @@ function renderBrandingTab() {
+   $('uploadSqLogo').onclick = async () => {
+     const f = $('fSqLogo').files[0];
+     if (!f) return gateMsg('sqLogoMsg', 'err', 'Choose an image file first.');
+-    $('uploadSqLogo').disabled = true; $('uploadSqLogo').textContent = 'Uploading&#8230;';
++    $('uploadSqLogo').disabled = true; $('uploadSqLogo').textContent = 'Uploading…';
+     try {
+       const url = await uploadImage(f, 'branding');
+       if (!url) throw new Error('Upload failed.');
+@@ -909,7 +925,7 @@ function showAddMagForm() {
+   $('addMagForm').innerHTML =
+     '<div class="formcard" style="margin-top:14px"><h3>New magazine</h3>' +
+     '<label>Magazine name</label><input type="text" id="nmName" placeholder="e.g. Pigeon Lifestyle">' +
+-    '<label>Logo (white or light logo recommended &#8212; it sits on a red tile)</label><input type="file" id="nmLogo" accept="image/*">' +
++    '<label>Logo (PNG recommended &#8212; it sits directly on the page)</label><input type="file" id="nmLogo" accept="image/*">' +
+     '<label><span class="toggle" style="margin:0"><input type="checkbox" id="nmPub" checked> Visible to the public</span></label>' +
+     '<button class="btn block" id="nmSave" style="margin-top:14px">Create magazine</button><div id="nmMsg"></div></div>';
+   $('nmSave').onclick = createMagazine;
+@@ -919,7 +935,7 @@ function showAddMagForm() {
+ async function createMagazine() {
+   const name = $('nmName').value.trim();
+   if (!name) return gateMsg('nmMsg', 'err', 'Please give the magazine a name.');
+-  $('nmSave').disabled = true; $('nmSave').textContent = 'Saving&#8230;';
++  $('nmSave').disabled = true; $('nmSave').textContent = 'Saving…';
+   let logoUrl = null, logoErr = null;
+   try {
+     logoUrl = await uploadImage($('nmLogo').files[0], 'magazines');
+@@ -951,7 +967,7 @@ function showEditMagForm(id, m) {
+   $('emSave').onclick = async () => {
+     const name = $('emName').value.trim();
+     if (!name) return gateMsg('emMsg', 'err', 'Name cannot be empty.');
+-    $('emSave').disabled = true; $('emSave').textContent = 'Saving&#8230;';
++    $('emSave').disabled = true; $('emSave').textContent = 'Saving…';
+     try {
+       let logoUrl = null, logoErr = null;
+       if ($('emLogo').files[0]) {
+@@ -1052,7 +1068,7 @@ async function createIssue(magId) {
+   if (!title) return gateMsg('niMsg', 'err', 'Please give the issue a title.');
+   if (!url) return gateMsg('niMsg', 'err', 'Please paste the flipbook link.');
+   if (!/^https?:\/\//i.test(url)) return gateMsg('niMsg', 'err', 'The flipbook link must start with http:// or https://');
+-  $('niSave').disabled = true; $('niSave').textContent = 'Saving&#8230;';
++  $('niSave').disabled = true; $('niSave').textContent = 'Saving…';
+   let thumbUrl = null, thumbErr = null;
+   try {
+     thumbUrl = await uploadImage($('niThumb').files[0], 'issues');
+@@ -1085,7 +1101,7 @@ function showEditIssueForm(magId, iss) {
+     const title = $('eiTitle').value.trim();
+     const url = $('eiUrl').value.trim();
+     if (!title || !url) return gateMsg('eiMsg', 'err', 'Title and flipbook link are required.');
+-    $('eiSave').disabled = true; $('eiSave').textContent = 'Saving&#8230;';
++    $('eiSave').disabled = true; $('eiSave').textContent = 'Saving…';
+     try {
+       let thumbUrl = null, thumbErr = null;
+       if ($('eiThumb').files[0]) {
+@@ -1138,8 +1154,9 @@ function installDismissedThisSession() {
+   try { return sessionStorage.getItem('pacInstallDismissed') === '1'; } catch (e) { return false; }
+ }
+ function maybeShowInstall() {
+-  if (isStandalone()) { markInstalledFlag(); return; }   // running as an installed app: never show
+-  if (hasInstalledBefore()) return;                      // installed once before: never nag again
++  if (isStandalone()) { markInstalledFlag(); $('installBanner').hidden = true; return; }   // running as an installed app: never show
++  $('installBanner').hidden = true;   // start hidden; only shown deliberately below
++  if (hasInstalledBefore()) return;   // installed once before: never nag again
+   if (installDismissedThisSession()) return;
+   if (isIOS()) {
+     let shown = false;
+@@ -1148,7 +1165,7 @@ function maybeShowInstall() {
+     try { sessionStorage.setItem('pacIOSHintShown', '1'); } catch (e) { /* ignore */ }
+     $('installText').textContent = 'Add PAC Media to your home screen: tap the Share button, then "Add to Home Screen".';
+     $('installBtn').textContent = 'How';
+-    $('installBtn').onclick = showIOSModal;
++    $('installBtn').onclick = showInstallHelp;
+     $('installBanner').hidden = false;
+     return;
+   }
+@@ -1157,20 +1174,36 @@ function maybeShowInstall() {
+     $('installBtn').textContent = 'Install';
+     $('installBtn').onclick = async () => {
+       $('installBanner').hidden = true;
+-      if (deferPrompt) { deferPrompt.prompt(); deferPrompt = null; }
++      if (!deferPrompt) { showInstallHelp(); return; }
++      const promptEvent = deferPrompt; deferPrompt = null;
++      try {
++        promptEvent.prompt();
++        const choice = await promptEvent.userChoice;
++        if (choice && choice.outcome === 'accepted') markInstalledFlag();
++      } catch (e) { showInstallHelp(); }
+     };
+     $('installBanner').hidden = false;
++    return;
++  }
++  // No native install prompt available: on phones offer the manual
++  // steps instead of a button that would do nothing. On desktop stay quiet.
++  if (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) {
++    $('installText').textContent = 'Add PAC Media to your home screen for one-tap reading.';
++    $('installBtn').textContent = 'How';
++    $('installBtn').onclick = showInstallHelp;
++    $('installBanner').hidden = false;
+   }
+ }
+-function showIOSModal() {
++function showInstallHelp() {
+   const back = document.createElement('div');
+   back.className = 'modal-back';
+   back.innerHTML =
+-    '<div class="modal"><h3>Install on iPhone / iPad</h3>' +
+-    '<ol><li>Open this site in <b>Safari</b>.</li><li>Tap the <b>Share</b> button (square with an arrow).</li>' +
+-    '<li>Scroll and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b> &#8211; the PAC Media icon appears on your home screen.</li></ol>' +
+-    '<button class="btn block" id="iosClose">Got it</button></div>';
+-  back.querySelector('#iosClose').onclick = () => back.remove();
++    '<div class="modal"><h3>Install PAC Media</h3>' +
++    '<ol><li><b>Android (Chrome):</b> tap the &#8942; menu and choose <b>Install app</b> or <b>Add to Home screen</b>.</li>' +
++    '<li><b>iPhone / iPad (Safari):</b> tap the <b>Share</b> button, then <b>Add to Home Screen</b>.</li></ol>' +
++    '<p class="hint" style="margin-top:10px">The PAC Media icon appears on your home screen and opens as its own app.</p>' +
++    '<button class="btn block" id="installHelpClose">Got it</button></div>';
++  back.querySelector('#installHelpClose').onclick = () => back.remove();
+   document.body.appendChild(back);
+ }
+ window.addEventListener('beforeinstallprompt', (e) => {
+diff --git a/supabase-setup.sql b/supabase-setup.sql
+index 029e860..3a12eed 100644
+--- a/supabase-setup.sql
++++ b/supabase-setup.sql
+@@ -19,7 +19,7 @@ create table if not exists public.app_settings (
+   square_logo_url text,
+   mag_logo_radius int not null default 16,
+   mag_logo_border_w int not null default 2,
+-  mag_logo_border_color text not null default '#FFFFFF',
++  mag_logo_border_color text not null default '#C8102E',
+   footer_text text not null default 'A Digital Publishing Platform by Pigeon Advertising & Communications.',
+   updated_at timestamptz not null default now()
+ );
+diff --git a/sw.js b/sw.js
+index c03305c..e79bead 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,5 +1,5 @@
+ /* PAC Media service worker - offline app shell */
+-const CACHE = 'pac-media-v3';
++const CACHE = 'pac-media-v4';
+ const ASSETS = [
+   './',
+   './index.html',
