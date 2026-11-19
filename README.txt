@@ -17,14 +17,14 @@ FILES IN THIS FOLDER
   PATCH-NOTES.txt       What changed in this version + how to apply it.
   assets/               (empty - logos are uploaded from the Dashboard)
 
-HOW TO APPLY UPDATE v4 WITH THE PATCH FILE (pac-media-v4.patch)
-  1. Put pac-media-v4.patch inside your project folder
+HOW TO APPLY UPDATE v5 WITH THE PATCH FILE (pac-media-v5.patch)
+  1. Put pac-media-v5.patch inside your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal, run these one at a time:
        git pull
-       git apply pac-media-v4.patch
+       git apply pac-media-v5.patch
        git add .
-       git commit -m "v4: strip on all pages, logo tiles, banner fixes"
+       git commit -m "v5: install banner back, fullscreen flipbook"
        git push
   3. Reload the app on your phone twice (first load fetches the new
      version, the second shows it).

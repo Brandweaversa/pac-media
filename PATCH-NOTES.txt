@@ -1,79 +1,62 @@
-PAC MEDIA - UPDATE v4 (November 2026) - PATCH NOTES
+PAC MEDIA - UPDATE v5 (November 2026) - PATCH NOTES
 ===================================================
 
 HOW TO APPLY (git patch)
-  1. Save pac-media-v4.patch into your project folder
+  1. Save pac-media-v5.patch into your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal:
        git pull
-       git apply pac-media-v4.patch
+       git apply pac-media-v5.patch
        git add .
-       git commit -m "v4: strip on all pages, logo tiles, banner fixes"
+       git commit -m "v5: install banner back, fullscreen flipbook"
        git push
   3. Reload the app on your phone twice (first load fetches the new
      version, the second shows it).
-  4. If you have not run database-update.sql in the Supabase SQL
-     Editor yet, run it once. It unlocks the logo style settings and
-     locks the database to your admin account only.
 
   The patch does NOT touch config.js - your keys stay as they are.
 
-WHAT'S FIXED IN v4
+WHAT'S FIXED IN v5
 
-  Red strip with the small square logo - on EVERY page
-  - The red strip with your small logo now appears at the top of all
-    inside pages: the magazine hub, every magazine page, every issue
-    reader, the admin sign-in and the dashboard. If you have not
-    uploaded a separate square logo, your main logo is used there.
+  Install banner is back - in the browser too
+  - Cause found: the app permanently remembered "this person has
+    installed before", and that memory made it hide the banner
+    everywhere, forever, even in the normal browser.
+  - That memory is gone. The install offer now appears on every
+    visit in the browser until the app is actually installed - or
+    until you close it with the X (then it stays closed just for
+    that visit).
+  - In the installed app itself the banner still never appears
+    (that is by design - you are already using the app).
+  - Where the browser can offer the one-tap install dialog, the
+    banner button opens it; otherwise it opens clear step-by-step
+    install instructions for Android and iPhone.
 
-  "PAC MEDIA" text heading removed
-  - The text heading is gone; your logo on the red strip identifies
-    the app now.
-
-  Red background removed from magazine logos
-  - Magazine logos sit directly on the page again (hub and magazine
-    pages). No red tile behind them.
-  - The rounded border settings still work: corners, thickness and
-    color (border color default is back to your brand red).
-  - A magazine without a logo shows its name in red text instead.
-
-  Install banner - actually working now
-  - Root cause found: a CSS rule was overriding the "hidden" switch,
-    so the banner could never really disappear - that is why closing
-    it did nothing, why Install "did nothing" (the banner just stayed
-    on screen), and why it still showed inside the installed app.
-  - Fixed everywhere: the X now closes it (until the next visit),
-    Install pops up the real Android install dialog, and once the app
-    has been installed even once the banner never appears again -
-    not in the installed app, not in the browser.
-  - If the browser cannot offer the one-tap install dialog, the
-    Install button now opens clear step-by-step instructions instead
-    of doing nothing.
-
-  Issue reader - "Still loading" stuck forever - fixed
-  - Same CSS root cause: the "Loading magazine..." cover refused to
-    disappear even after the flipbook had loaded, hiding it. It now
-    disappears the moment the magazine is ready, and if the host
-    blocks embedding the "Open Flipbook" hint appears as designed.
-  - Also fixed the raw "&#8230;" text you saw - all "..." texts now
-    render properly.
-
-  Splash screen glitch when you change the logo size - fixed
-  - The app now remembers ALL branding settings on the phone and
-    applies them before the first paint, so the splash logo no longer
-    resizes mid-load. The splash logo's height setting is now
-    honoured as well (width and height reserve the exact space).
+  "Read Issue" now opens the flipbook FULLSCREEN
+  - Tapping a magazine cover no longer shows a half-page reader
+    squeezed under a header, a cover image and bars. The flipbook
+    now fills the entire screen edge to edge, exactly like the
+    source flipbook site, so all of the flipbook's own buttons
+    (zoom, page navigation, thumbnails, sound, share...) are
+    visible and usable.
+  - Two small floating buttons stay out of the way on top:
+    "<- Back" (left) returns to the magazine page and "Open ->"
+    (right) opens the flipbook in a browser tab if the host ever
+    refuses to embed.
+  - Bottom navigation and the footer hide themselves while reading
+    and come back when you return to the magazine.
 
   Under the hood
-  - Service worker cache bumped to v4 (so every device picks this up
+  - Service worker cache bumped to v5 (every device picks this up
     with two reloads).
-  - database-update.sql border default returned to brand red #C8102E
-    to match the new logo look (safe to re-run).
 
-ALSO IN THIS BUILD (from v3, if you applied it)
-  - Inter font across the whole app with a professional polish.
-  - Splash shows only your uploaded logo - the built-in placeholder
-    was removed from the project entirely.
-  - Graceful saves: if the database update has not run yet, the logo
-    width still saves and the app clearly says what needs the update.
-  - Security: only your administrator account can change content.
+CARRIED FROM v4 (already in your app)
+  - Red strip with the small square logo on every page, no
+    "PAC MEDIA" text heading.
+  - Magazine logos directly on the page (no red background) with
+    configurable rounded border.
+  - Working banner X button and Install button; reader loading
+    cover disappears when the flipbook is ready; no more raw
+    "&#8230;" text.
+  - Splash logo no longer resizes mid-load; splash height honoured.
+  - Inter font across the app; database locked to your admin
+    account.
