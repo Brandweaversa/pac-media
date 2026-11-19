@@ -15,9 +15,22 @@ FILES IN THIS FOLDER
                         SQL Editor once (adds new branding options,
                         repairs permissions, creates the image bucket).
   PATCH-NOTES.txt       What changed in this version + how to apply it.
-  assets/pac-logo.png   The white PAC logo shown on the red splash screen.
-                        Replace this file with your real logo (same name),
-                        or upload a logo later from the Dashboard > Branding.
+  assets/               (empty - logos are uploaded from the Dashboard)
+
+HOW TO APPLY UPDATE v3 WITH THE PATCH FILE (pac-media-v3.patch)
+  1. Put pac-media-v3.patch inside your project folder
+     (C:\Users\User\Documents\pac).
+  2. In the VS Code terminal, run these one at a time:
+       git pull
+       git apply pac-media-v3.patch
+       git add .
+       git commit -m "v3: Inter font, splash logo fix, red logo tiles"
+       git push
+  3. Supabase > SQL Editor > New query > paste the whole
+     database-update.sql > Run (adds the new settings columns -
+     without this the logo style settings cannot save).
+  4. Reload the app on your phone twice.
+  NOTE: the patch never touches config.js, so your keys stay safe.
   icons/                App icons shown on phone home screens.
 
 QUICK START (see the Setup Guide PDF for click-by-click instructions)

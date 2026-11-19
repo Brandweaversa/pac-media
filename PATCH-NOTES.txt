@@ -1,81 +1,75 @@
-PAC MEDIA - UPDATE v2 (November 2026) - PATCH NOTES
+PAC MEDIA - UPDATE v3 (November 2026) - PATCH NOTES
 ===================================================
 
-HOW TO APPLY (3 steps, about 10 minutes)
-  1. Replace your old website files with the files in this folder
-     (keep your edited config.js - the new config.js is identical
-     apart from comments, so nothing to re-enter).
-     Re-deploy: commit + push to GitHub and Vercel redeploys
-     automatically, or drag the folder into Vercel again.
-  2. Supabase Dashboard > SQL Editor > New query > paste the whole
-     database-update.sql file > Run. This adds the new settings,
-     repairs permissions, and creates the image bucket that was
-     missing (the reason uploaded issue images did not show).
-  3. Open your app and reload it twice. The first load fetches the
-     new version, the second shows it.
+HOW TO APPLY (git patch - no file replacing needed)
+  1. Save pac-media-v3.patch into your project folder
+     (C:\Users\User\Documents\pac).
+  2. In the VS Code terminal:
+       git pull
+       git apply pac-media-v3.patch
+       git add .
+       git commit -m "v3: Inter font, splash logo fix, red logo tiles"
+       git push
+  3. Supabase Dashboard > SQL Editor > New query > paste the whole
+     database-update.sql > Run.  <<< THIS IS THE STEP THAT FIXES
+     "The database is missing the new settings columns"
+  4. Reload the app on your phone twice (first load fetches the new
+     version, second shows it).
 
-WHAT'S FIXED / NEW IN THIS UPDATE
+  The patch does NOT touch config.js - your keys stay as they are.
 
-  Splash screen
-  - Your uploaded logo now appears immediately. The app remembers
-    it between visits (cached on the phone) and only shows it once
-    fully loaded, so the built-in placeholder never flashes over it.
+WHAT'S NEW IN v3
+
+  Professional look - Inter font
+  - The entire app now uses Inter (the font used by modern apps like
+    Vercel and GitHub), with softer shadows, rounded buttons that
+    respond to touch, and a subtle fade-in on every screen.
+
+  Splash screen - text placeholder removed completely
+  - The built-in "PAC" text placeholder logo no longer exists in the
+    app. The splash shows ONLY your uploaded logo (loaded from your
+    database, remembered on the phone so it appears instantly).
+    Before the logo arrives the splash is simply the red screen.
+  - assets/pac-logo.png has been deleted from the project.
+
+  Magazine hub - red tiles
+  - Every magazine now sits on a RED TILE (your brand red) with its
+    logo centered on it - this is why logos that are white or light
+    (like your Travel Passport logo, which is tan on transparency)
+    finally show up properly instead of disappearing into the white
+    background or showing as text.
+  - A magazine without a logo shows its name in white on the red tile.
+  - The magazine page shows the same red tile.
+  - Rounded corners, border thickness and border color are still
+    controlled in Dashboard > Branding > Magazine logos (border now
+    defaults to white, which frames the red tile).
 
   Install banner
-  - Never shown anymore when the app is already installed
-    (opened from the home screen icon).
-  - The X button now closes it just for the current visit - readers
-    who tap X will be offered installation again on their next visit.
+  - Once the app has been installed (opened from the home screen
+    icon) even once, the banner never appears again on that device -
+    not in the installed app and not in the browser.
+  - The X button still closes it for the current visit, and it is
+    offered again on the next visit until installed.
 
-  Footer text
-  - "Copyright ... A Digital Publishing Platform by Pigeon
-    Advertising & Communications." now sits fixed just above the
-    bottom navigation on every screen (instead of at the end of
-    the page).
+  Settings that could not save - fixed two ways
+  - The database update (step 3 above) adds the missing columns, so
+    all logo style settings save normally.
+  - Until the update is run, the app now saves what it can (the logo
+    width) and clearly tells you what still needs the database update,
+    instead of failing the whole save.
 
-  Inside pages (magazine page + issue/reader page)
-  - New red strip at the top with a small logo centered on it.
-  - Dashboard > Branding > "Small square logo (inside pages)":
-    upload your small square PAC logo there. If you don't upload
-    one, the app uses your main logo automatically.
+  Security hardening (in database-update.sql)
+  - An older repair script had allowed ANY signed-in account to edit
+    magazines and issues. The database update now locks writes to your
+    administrator account only. Reading stays public.
 
-  Magazine logos (hub + magazine pages)
-  - Rounded border on every magazine logo.
-  - Dashboard > Branding > "Magazine logos" lets you adjust:
-    logo width, corner roundness (radius), border thickness
-    (0 = no border) and border color, with a live preview.
+  Also in v3 (carried from v2)
+  - Issue covers displayed uncropped on top of the issue name, the
+    issue page shows the cover, "Open Flipbook" button, swipe between
+    screens, footer pinned just above the bottom navigation, upload
+    errors no longer lose your data.
 
-  Issues
-  - Issue cards are rebuilt: the cover image sits on top, the
-    issue name below it, and the image is never cropped (same
-    uncropped style as the magazine logos).
-  - The issue page (when you tap an issue) now shows the cover
-    image as well - it was missing entirely before.
-  - Issue images not showing: the app was uploading into a storage
-    bucket that did not exist in your database. database-update.sql
-    creates it. If an image upload ever fails now, the issue is
-    still saved and the app tells you exactly what went wrong
-    instead of silently losing the image.
-  - The button now says "Open Flipbook" instead of "Open".
-
-  Navigation
-  - Swipe left / right anywhere (outside forms) to move between
-    screens - useful on screens without a back button.
-
-FILES IN THIS FOLDER
-  index.html            The whole app (updated).
-  config.js             Your two Supabase keys (unchanged).
-  manifest.json         App info for home-screen install (unchanged).
-  sw.js                 Offline support - cache version bumped so
-                        readers get the update automatically.
-  supabase-setup.sql    Full setup for a NEW database (updated).
-  database-update.sql   NEW - run this once on your existing database.
-  assets/, icons/       Logos and app icons (unchanged).
-
-IF SOMETHING LOOKS OLD AFTER DEPLOYING
-  - Reload the app twice (the service worker refreshes on the
-    first load).
-  - Android Chrome: the install banner only appears in the browser,
-    never inside the installed app.
-  - Still stuck? Send me the exact error text and which screen it
-    happened on.
+IF THE LOGO STYLE SETTINGS STILL SAY "database is missing columns"
+  database-update.sql has not run yet on your Supabase project.
+  Supabase Dashboard > SQL Editor > New query > paste the whole file
+  > Run. It is safe to run it any number of times.
