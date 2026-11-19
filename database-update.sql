@@ -16,6 +16,20 @@ alter table public.app_settings add column if not exists mag_logo_radius int not
 alter table public.app_settings add column if not exists mag_logo_border_w int not null default 2;
 alter table public.app_settings add column if not exists mag_logo_border_color text not null default '#C8102E';
 
+-- ---------- 1b. Intro heading & paragraph (hub and magazine pages) ----------
+alter table public.app_settings add column if not exists hub_heading text;
+alter table public.app_settings add column if not exists hub_text text;
+alter table public.app_settings add column if not exists hub_heading_size int not null default 24;
+alter table public.app_settings add column if not exists hub_heading_color text not null default '#141414';
+alter table public.app_settings add column if not exists hub_text_size int not null default 14;
+alter table public.app_settings add column if not exists hub_text_color text not null default '#6b6b6b';
+alter table public.magazines add column if not exists intro_heading text;
+alter table public.magazines add column if not exists intro_text text;
+alter table public.magazines add column if not exists intro_heading_size int not null default 22;
+alter table public.magazines add column if not exists intro_heading_color text not null default '#141414';
+alter table public.magazines add column if not exists intro_text_size int not null default 14;
+alter table public.magazines add column if not exists intro_text_color text not null default '#6b6b6b';
+
 -- ---------- 2. Admin check helper (needed by the policies below) ----------
 create or replace function public.is_pac_admin()
 returns boolean

@@ -20,6 +20,12 @@ create table if not exists public.app_settings (
   mag_logo_radius int not null default 16,
   mag_logo_border_w int not null default 2,
   mag_logo_border_color text not null default '#C8102E',
+  hub_heading text,
+  hub_text text,
+  hub_heading_size int not null default 24,
+  hub_heading_color text not null default '#141414',
+  hub_text_size int not null default 14,
+  hub_text_color text not null default '#6b6b6b',
   footer_text text not null default 'A Digital Publishing Platform by Pigeon Advertising & Communications.',
   updated_at timestamptz not null default now()
 );
@@ -31,6 +37,12 @@ create table if not exists public.magazines (
   logo_url text,
   published boolean not null default true,
   sort_order int not null default 0,
+  intro_heading text,
+  intro_text text,
+  intro_heading_size int not null default 22,
+  intro_heading_color text not null default '#141414',
+  intro_text_size int not null default 14,
+  intro_text_color text not null default '#6b6b6b',
   created_at timestamptz not null default now()
 );
 

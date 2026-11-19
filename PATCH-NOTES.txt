@@ -1,40 +1,56 @@
-PAC MEDIA - UPDATE v7 (November 2026) - PATCH NOTES
+PAC MEDIA - UPDATE v8 (November 2026) - PATCH NOTES
 ===================================================
 
 HOW TO APPLY (git patch)
-  1. Save pac-media-v7.patch into your project folder
+  1. Save pac-media-v8.patch into your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal:
        git pull
-       git apply pac-media-v7.patch
+       git apply pac-media-v8.patch
        git add .
-       git commit -m "v7: back button on magazine page, no duplicate name"
+       git commit -m "v8: intro heading and paragraph on hub and magazine pages"
        git push
   3. Reload the app on your phone twice (first load fetches the new
      version, the second shows it).
 
   The patch does NOT touch config.js - your keys stay as they are.
 
-WHAT'S CHANGED IN v7
+IMPORTANT - ONE-TIME DATABASE STEP
+  The intro heading and paragraph are stored in new database
+  columns. Run database-update.sql once in the Supabase SQL
+  Editor (paste the ENTIRE file > Run). Until you run it, the app
+  works exactly as before and saving an intro shows a clear
+  message telling you to run the file first. Nothing breaks.
 
-  The magazine page (the one listing all issues)
-  - Added a Back button. It sits just below the red strip, on the
-    left, and returns you to the magazines hub. The page never had
-    one - the only way out was the phone's system back.
-  - Removed the magazine name text that sat under the magazine
-    logo. The logo already says who it is, so the name was just a
-    duplicate. The small red dash under the logo stays.
-  - If a magazine ever has no logo uploaded, its name still shows
-    in the logo's place - that fallback is untouched.
+WHAT'S NEW IN v8
 
-CARRIED FROM v6 (already in your app)
+  Custom heading and paragraph on the magazines hub
+  - Dashboard > Branding tab > "Hub intro" card.
+  - Type a heading and a paragraph, choose the font size and the
+    color of each (color picker or hex code). Save.
+  - They appear at the top of the all-magazines page, above the
+    magazine logos, centered.
+  - Leave the fields empty and nothing shows - the hub stays
+    exactly as it was.
+
+  Custom heading and paragraph on every magazine page
+  - Dashboard > Magazines > Edit (on the magazine) - the intro
+    fields sit under the name and logo.
+  - Each magazine has its own heading + paragraph with their own
+    size and color. They appear between the magazine logo and the
+    list of issues.
+  - Leave them empty and that magazine simply has no intro.
+
+  Sizes and colors are in pixels / hex color, with sensible
+  defaults (heading 24px dark, paragraph 14px grey) if you leave
+  the size/color fields alone.
+
+CARRIED FROM v7 (already in your app)
+  - Back button on the magazine page; no duplicate magazine name
+    under the logo.
   - Flipbook opens clean and fullscreen: no floating Back/Open
-    buttons, no popup - only the magazine and its own controls.
-    Back out of the flipbook with the phone's system back
-    (or left-edge swipe on iPhone in Safari).
-  - Install banner shows on every visit in the normal browser
-    (Android gets the one-tap Install dialog; other phones get
-    step-by-step instructions). It never appears inside the
-    installed app, and the X closes it just for that visit.
-  - Service worker cache bumped to v7 (every device picks this up
+    buttons, no popup. Back out with the phone's system back.
+  - Install banner shows on every visit in the normal browser;
+    never inside the installed app; X closes it for that visit.
+  - Service worker cache bumped to v8 (every device picks this up
     with two reloads).

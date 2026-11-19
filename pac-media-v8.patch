@@ -1,0 +1,366 @@
+diff --git a/PATCH-NOTES.txt b/PATCH-NOTES.txt
+index 62e545e..fa54963 100644
+--- a/PATCH-NOTES.txt
++++ b/PATCH-NOTES.txt
+@@ -1,40 +1,56 @@
+-PAC MEDIA - UPDATE v7 (November 2026) - PATCH NOTES
++PAC MEDIA - UPDATE v8 (November 2026) - PATCH NOTES
+ ===================================================
+ 
+ HOW TO APPLY (git patch)
+-  1. Save pac-media-v7.patch into your project folder
++  1. Save pac-media-v8.patch into your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal:
+        git pull
+-       git apply pac-media-v7.patch
++       git apply pac-media-v8.patch
+        git add .
+-       git commit -m "v7: back button on magazine page, no duplicate name"
++       git commit -m "v8: intro heading and paragraph on hub and magazine pages"
+        git push
+   3. Reload the app on your phone twice (first load fetches the new
+      version, the second shows it).
+ 
+   The patch does NOT touch config.js - your keys stay as they are.
+ 
+-WHAT'S CHANGED IN v7
++IMPORTANT - ONE-TIME DATABASE STEP
++  The intro heading and paragraph are stored in new database
++  columns. Run database-update.sql once in the Supabase SQL
++  Editor (paste the ENTIRE file > Run). Until you run it, the app
++  works exactly as before and saving an intro shows a clear
++  message telling you to run the file first. Nothing breaks.
+ 
+-  The magazine page (the one listing all issues)
+-  - Added a Back button. It sits just below the red strip, on the
+-    left, and returns you to the magazines hub. The page never had
+-    one - the only way out was the phone's system back.
+-  - Removed the magazine name text that sat under the magazine
+-    logo. The logo already says who it is, so the name was just a
+-    duplicate. The small red dash under the logo stays.
+-  - If a magazine ever has no logo uploaded, its name still shows
+-    in the logo's place - that fallback is untouched.
++WHAT'S NEW IN v8
+ 
+-CARRIED FROM v6 (already in your app)
++  Custom heading and paragraph on the magazines hub
++  - Dashboard > Branding tab > "Hub intro" card.
++  - Type a heading and a paragraph, choose the font size and the
++    color of each (color picker or hex code). Save.
++  - They appear at the top of the all-magazines page, above the
++    magazine logos, centered.
++  - Leave the fields empty and nothing shows - the hub stays
++    exactly as it was.
++
++  Custom heading and paragraph on every magazine page
++  - Dashboard > Magazines > Edit (on the magazine) - the intro
++    fields sit under the name and logo.
++  - Each magazine has its own heading + paragraph with their own
++    size and color. They appear between the magazine logo and the
++    list of issues.
++  - Leave them empty and that magazine simply has no intro.
++
++  Sizes and colors are in pixels / hex color, with sensible
++  defaults (heading 24px dark, paragraph 14px grey) if you leave
++  the size/color fields alone.
++
++CARRIED FROM v7 (already in your app)
++  - Back button on the magazine page; no duplicate magazine name
++    under the logo.
+   - Flipbook opens clean and fullscreen: no floating Back/Open
+-    buttons, no popup - only the magazine and its own controls.
+-    Back out of the flipbook with the phone's system back
+-    (or left-edge swipe on iPhone in Safari).
+-  - Install banner shows on every visit in the normal browser
+-    (Android gets the one-tap Install dialog; other phones get
+-    step-by-step instructions). It never appears inside the
+-    installed app, and the X closes it just for that visit.
+-  - Service worker cache bumped to v7 (every device picks this up
++    buttons, no popup. Back out with the phone's system back.
++  - Install banner shows on every visit in the normal browser;
++    never inside the installed app; X closes it for that visit.
++  - Service worker cache bumped to v8 (every device picks this up
+     with two reloads).
+diff --git a/README.txt b/README.txt
+index 4bf56f5..7ea1fe2 100644
+--- a/README.txt
++++ b/README.txt
+@@ -17,20 +17,21 @@ FILES IN THIS FOLDER
+   PATCH-NOTES.txt       What changed in this version + how to apply it.
+   assets/               (empty - logos are uploaded from the Dashboard)
+ 
+-HOW TO APPLY UPDATE v7 WITH THE PATCH FILE (pac-media-v7.patch)
+-  1. Put pac-media-v7.patch inside your project folder
++HOW TO APPLY UPDATE v8 WITH THE PATCH FILE (pac-media-v8.patch)
++  1. Put pac-media-v8.patch inside your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal, run these one at a time:
+        git pull
+-       git apply pac-media-v7.patch
++       git apply pac-media-v8.patch
+        git add .
+-       git commit -m "v7: back button on magazine page, no duplicate name"
++       git commit -m "v8: intro heading and paragraph on hub and magazine pages"
+        git push
+   3. Reload the app on your phone twice (first load fetches the new
+      version, the second shows it).
+-  4. If you have not run database-update.sql in the Supabase SQL
+-     Editor yet, run it once - it unlocks the logo style settings
+-     and locks the database to your admin account only.
++  4. Run database-update.sql in the Supabase SQL Editor if you have
++     not already - it unlocks the logo style settings, the new
++     intro heading/paragraph fields, and locks the database to
++     your admin account only.
+   NOTE: the patch never touches config.js, so your keys stay safe.
+   icons/                App icons shown on phone home screens.
+ 
+diff --git a/database-update.sql b/database-update.sql
+index 2639758..c024ad8 100644
+--- a/database-update.sql
++++ b/database-update.sql
+@@ -16,6 +16,20 @@ alter table public.app_settings add column if not exists mag_logo_radius int not
+ alter table public.app_settings add column if not exists mag_logo_border_w int not null default 2;
+ alter table public.app_settings add column if not exists mag_logo_border_color text not null default '#C8102E';
+ 
++-- ---------- 1b. Intro heading & paragraph (hub and magazine pages) ----------
++alter table public.app_settings add column if not exists hub_heading text;
++alter table public.app_settings add column if not exists hub_text text;
++alter table public.app_settings add column if not exists hub_heading_size int not null default 24;
++alter table public.app_settings add column if not exists hub_heading_color text not null default '#141414';
++alter table public.app_settings add column if not exists hub_text_size int not null default 14;
++alter table public.app_settings add column if not exists hub_text_color text not null default '#6b6b6b';
++alter table public.magazines add column if not exists intro_heading text;
++alter table public.magazines add column if not exists intro_text text;
++alter table public.magazines add column if not exists intro_heading_size int not null default 22;
++alter table public.magazines add column if not exists intro_heading_color text not null default '#141414';
++alter table public.magazines add column if not exists intro_text_size int not null default 14;
++alter table public.magazines add column if not exists intro_text_color text not null default '#6b6b6b';
++
+ -- ---------- 2. Admin check helper (needed by the policies below) ----------
+ create or replace function public.is_pac_admin()
+ returns boolean
+diff --git a/index.html b/index.html
+index e98441a..b2cbefa 100644
+--- a/index.html
++++ b/index.html
+@@ -78,6 +78,9 @@ footer.pagefoot{position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(saf
+ .mag-head-tile{padding:22px 28px}
+ .mag-head .mag-tile img{width:min(var(--hub-w),66vw)}
+ .issues{display:flex;flex-direction:column;gap:18px;padding:26px 20px 0;max-width:560px;margin:0 auto}
++.pageintro{max-width:560px;margin:0 auto;padding:28px 22px 0;text-align:center}
++.pageintro h2{font-weight:800;line-height:1.3;letter-spacing:.01em}
++.pageintro p{line-height:1.65;margin:10px 0 0}
+ 
+ /* Issue card: cover image on top (uncropped), title below */
+ .issue-card{position:relative;display:block;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(16,16,16,.06),0 4px 14px rgba(16,16,16,.04);transition:transform .15s ease}
+@@ -210,6 +213,12 @@ const DEFAULTS = {
+   mag_logo_radius: 16,
+   mag_logo_border_w: 2,
+   mag_logo_border_color: '#C8102E',
++  hub_heading: '',
++  hub_text: '',
++  hub_heading_size: 24,
++  hub_heading_color: '#141414',
++  hub_text_size: 14,
++  hub_text_color: '#6b6b6b',
+   footer_text: 'A Digital Publishing Platform by Pigeon Advertising & Communications.',
+   admin_created: false,
+   admin_user_id: null
+@@ -427,6 +436,20 @@ function magTileHTML(m) {
+     (m.logo_url ? '<img src="' + esc(m.logo_url) + '" alt="' + esc(m.name) + '">' : '<span class="tile-name">' + esc(m.name) + '</span>') +
+     '</span>';
+ }
++/* Admin-written intro (heading + paragraph) with chosen size and color */
++function introHTML(d) {
++  const head = (d.heading || '').trim();
++  const text = (d.text || '').trim();
++  if (!head && !text) return '';
++  const hs = clamp(num(d.hSize, d.hSizeDef), 10, 80);
++  const ts = clamp(num(d.tSize, d.tSizeDef), 10, 40);
++  const hc = /^#[0-9a-fA-F]{6}$/.test(d.hColor || '') ? d.hColor : d.hColorDef;
++  const tc = /^#[0-9a-fA-F]{6}$/.test(d.tColor || '') ? d.tColor : d.tColorDef;
++  return '<div class="pageintro">' +
++    (head ? '<h2 style="font-size:' + hs + 'px;color:' + hc + '">' + esc(head) + '</h2>' : '') +
++    (text ? '<p style="font-size:' + ts + 'px;color:' + tc + '">' + esc(text) + '</p>' : '') +
++    '</div>';
++}
+ /* ---------- hub ---------- */
+ async function renderHub(epoch) {
+   const box = $('hub');
+@@ -448,7 +471,8 @@ async function renderHub(epoch) {
+     : '<div class="empty" style="margin:10px auto 0"><div class="card"><h3>No magazines yet</h3><p>' +
+       (cfgReady() ? 'Sign in to the Dashboard to publish your first magazine.' : 'Connect Supabase in config.js (Setup Guide, Steps 6-7) to go live.') +
+       '</p></div></div>';
+-  box.innerHTML = stripHTML() + '<div class="stack">' + stack + '</div>';
++  const intro = introHTML({ heading: S.hub_heading, text: S.hub_text, hSize: S.hub_heading_size, hColor: S.hub_heading_color, tSize: S.hub_text_size, tColor: S.hub_text_color, hSizeDef: 24, tSizeDef: 14, hColorDef: '#141414', tColorDef: '#6b6b6b' });
++  box.innerHTML = stripHTML() + intro + '<div class="stack">' + stack + '</div>';
+ }
+ 
+ /* ---------- magazine page ---------- */
+@@ -491,6 +515,7 @@ async function renderMagazine(slug, epoch) {
+       (mag.logo_url ? '<img src="' + esc(mag.logo_url) + '" alt="' + esc(mag.name) + '">' : '<span class="tile-name">' + esc(mag.name) + '</span>') +
+       '</span>' +
+       '<div class="reddash"></div></div>' +
++      introHTML({ heading: mag.intro_heading, text: mag.intro_text, hSize: mag.intro_heading_size, hColor: mag.intro_heading_color, tSize: mag.intro_text_size, tColor: mag.intro_text_color, hSizeDef: 22, tSizeDef: 14, hColorDef: '#141414', tColorDef: '#6b6b6b' }) +
+       '<div class="issues">' + cards + '</div>';
+   } catch (e) { box.innerHTML = stripHTML() + errView(e.message); }
+ }
+@@ -731,6 +756,19 @@ function renderBrandingTab() {
+       '<button class="btn block" id="saveBranding" style="margin-top:18px">Save branding</button>' +
+       '<div id="brandMsg"></div>' +
+     '</div>' +
++    '<div class="formcard"><h3>Hub intro (heading &amp; paragraph above the magazine logos)</h3>' +
++      '<label>Heading</label><input type="text" id="fHubH" value="' + esc(S.hub_heading || '') + '">' +
++      '<label>Heading font size (px)</label><input type="number" id="fHubHs" min="10" max="80" value="' + esc(clamp(num(S.hub_heading_size, 24), 10, 80)) + '">' +
++      '<label>Heading color</label><div class="colorrow"><input type="color" id="fHubHc" value="' + esc(S.hub_heading_color || '#141414') + '">' +
++      '<input type="text" id="fHubHcHex" value="' + esc(S.hub_heading_color || '#141414') + '" style="max-width:140px"></div>' +
++      '<label>Paragraph</label><textarea id="fHubT" rows="3">' + esc(S.hub_text || '') + '</textarea>' +
++      '<label>Paragraph font size (px)</label><input type="number" id="fHubTs" min="10" max="40" value="' + esc(clamp(num(S.hub_text_size, 14), 10, 40)) + '">' +
++      '<label>Paragraph color</label><div class="colorrow"><input type="color" id="fHubTc" value="' + esc(S.hub_text_color || '#6b6b6b') + '">' +
++      '<input type="text" id="fHubTcHex" value="' + esc(S.hub_text_color || '#6b6b6b') + '" style="max-width:140px"></div>' +
++      '<div class="hint">Shows at the top of the all-magazines page, above the logos. Leave the fields empty to show nothing. First run database-update.sql so the database has the intro fields.</div>' +
++      '<button class="btn block" id="saveHubIntro" style="margin-top:18px">Save hub intro</button>' +
++      '<div id="hubIntroMsg"></div>' +
++    '</div>' +
+     '<div class="formcard"><h3>Main logo (splash screen)</h3>' +
+       '<div class="previewbox" style="background:var(--red)">' + mainLogoPrev + '</div>' +
+       '<div class="hint">Your white-on-transparent logo shows here on the red background, exactly like the splash screen. Until you upload one, the splash shows the red screen only.</div>' +
+@@ -797,6 +835,34 @@ function renderBrandingTab() {
+     } catch (e) { gateMsg('brandMsg', 'err', e.message); }
+     $('saveBranding').disabled = false;
+   };
++  const hubHc = $('fHubHc'), hubHcHex = $('fHubHcHex');
++  hubHc.oninput = () => { hubHcHex.value = hubHc.value; };
++  hubHcHex.onchange = () => { if (/^#[0-9a-fA-F]{6}$/.test(hubHcHex.value)) hubHc.value = hubHcHex.value; };
++  const hubTc = $('fHubTc'), hubTcHex = $('fHubTcHex');
++  hubTc.oninput = () => { hubTcHex.value = hubTc.value; };
++  hubTcHex.onchange = () => { if (/^#[0-9a-fA-F]{6}$/.test(hubTcHex.value)) hubTc.value = hubTcHex.value; };
++  $('saveHubIntro').onclick = async () => {
++    const patch = {
++      hub_heading: $('fHubH').value.trim(),
++      hub_text: $('fHubT').value.trim(),
++      hub_heading_size: clamp(num($('fHubHs').value, 24), 10, 80),
++      hub_heading_color: /^#[0-9a-fA-F]{6}$/.test(hubHcHex.value) ? hubHcHex.value : S.hub_heading_color,
++      hub_text_size: clamp(num($('fHubTs').value, 14), 10, 40),
++      hub_text_color: /^#[0-9a-fA-F]{6}$/.test(hubTcHex.value) ? hubTcHex.value : S.hub_text_color,
++      updated_at: new Date().toISOString()
++    };
++    $('saveHubIntro').disabled = true;
++    try {
++      const r = await sb.from('app_settings').update(patch).eq('id', 1).select().maybeSingle();
++      if (r.error) throw r.error;
++      if (r.data) S = Object.assign({}, DEFAULTS, r.data);
++      applyTheme(); route();
++      gateMsg('hubIntroMsg', 'ok', 'Saved. The hub now shows your heading and paragraph.');
++    } catch (e) {
++      gateMsg('hubIntroMsg', 'err', needsDbUpdate(e) ? 'The database needs the intro columns first: ' + dbUpdateHint : e.message);
++    }
++    $('saveHubIntro').disabled = false;
++  };
+   $('saveMagLogos').onclick = async () => {
+     const patch = {
+       hub_logo_w: clamp(num($('fHubW').value, 260), 80, 600),
+@@ -950,7 +1016,22 @@ function showEditMagForm(id, m) {
+     '<div class="formcard" style="margin-top:14px"><h3>Edit magazine</h3>' +
+     '<label>Magazine name</label><input type="text" id="emName" value="' + esc(m.name) + '">' +
+     '<label>Replace logo (optional)</label><input type="file" id="emLogo" accept="image/*">' +
++    '<label>Intro heading (shown above the issues)</label><input type="text" id="emH" value="' + esc(m.intro_heading || '') + '">' +
++    '<label>Heading font size (px)</label><input type="number" id="emHs" min="10" max="80" value="' + esc(clamp(num(m.intro_heading_size, 22), 10, 80)) + '">' +
++    '<label>Heading color</label><div class="colorrow"><input type="color" id="emHc" value="' + esc(/^#[0-9a-fA-F]{6}$/.test(m.intro_heading_color || '') ? m.intro_heading_color : '#141414') + '">' +
++    '<input type="text" id="emHcHex" value="' + esc(/^#[0-9a-fA-F]{6}$/.test(m.intro_heading_color || '') ? m.intro_heading_color : '#141414') + '" style="max-width:140px"></div>' +
++    '<label>Intro paragraph (shown under the heading, above the issues)</label><textarea id="emT" rows="3">' + esc(m.intro_text || '') + '</textarea>' +
++    '<label>Paragraph font size (px)</label><input type="number" id="emTs" min="10" max="40" value="' + esc(clamp(num(m.intro_text_size, 14), 10, 40)) + '">' +
++    '<label>Paragraph color</label><div class="colorrow"><input type="color" id="emTc" value="' + esc(/^#[0-9a-fA-F]{6}$/.test(m.intro_text_color || '') ? m.intro_text_color : '#6b6b6b') + '">' +
++    '<input type="text" id="emTcHex" value="' + esc(/^#[0-9a-fA-F]{6}$/.test(m.intro_text_color || '') ? m.intro_text_color : '#6b6b6b') + '" style="max-width:140px"></div>' +
++    '<div class="hint">Leave both text fields empty to show no intro. First run database-update.sql so the database has the intro fields.</div>' +
+     '<button class="btn block" id="emSave" style="margin-top:14px">Save changes</button><div id="emMsg"></div></div>';
++  const ehc = $('emHc'), ehcHex = $('emHcHex');
++  ehc.oninput = () => { ehcHex.value = ehc.value; };
++  ehcHex.onchange = () => { if (/^#[0-9a-fA-F]{6}$/.test(ehcHex.value)) ehc.value = ehcHex.value; };
++  const etc = $('emTc'), etcHex = $('emTcHex');
++  etc.oninput = () => { etcHex.value = etc.value; };
++  etcHex.onchange = () => { if (/^#[0-9a-fA-F]{6}$/.test(etcHex.value)) etc.value = etcHex.value; };
+   $('emSave').onclick = async () => {
+     const name = $('emName').value.trim();
+     if (!name) return gateMsg('emMsg', 'err', 'Name cannot be empty.');
+@@ -961,12 +1042,33 @@ function showEditMagForm(id, m) {
+         try { logoUrl = await uploadImage($('emLogo').files[0], 'magazines'); }
+         catch (e) { logoErr = e.message; }
+       }
+-      const patch = { name: name };
++      const patch = {
++        name: name,
++        intro_heading: $('emH').value.trim(),
++        intro_text: $('emT').value.trim(),
++        intro_heading_size: clamp(num($('emHs').value, 22), 10, 80),
++        intro_heading_color: /^#[0-9a-fA-F]{6}$/.test(ehcHex.value) ? ehcHex.value : '#141414',
++        intro_text_size: clamp(num($('emTs').value, 14), 10, 40),
++        intro_text_color: /^#[0-9a-fA-F]{6}$/.test(etcHex.value) ? etcHex.value : '#6b6b6b'
++      };
+       if (logoUrl) patch.logo_url = logoUrl;
+-      const r = await sb.from('magazines').update(patch).eq('id', id);
+-      if (r.error) throw r.error;
+-      toast(logoErr ? 'Saved, but the logo failed to upload: ' + logoErr : 'Magazine updated');
+-      renderMagsTab();
++      try {
++        const r = await sb.from('magazines').update(patch).eq('id', id);
++        if (r.error) throw r.error;
++        toast(logoErr ? 'Saved, but the logo failed to upload: ' + logoErr : 'Magazine updated');
++        renderMagsTab();
++      } catch (e2) {
++        if (needsDbUpdate(e2)) {
++          // Intro columns not added yet: still save the name/logo, and
++          // point to database-update.sql for the intro fields.
++          const legacy = { name: name };
++          if (logoUrl) legacy.logo_url = logoUrl;
++          const r2 = await sb.from('magazines').update(legacy).eq('id', id);
++          if (r2.error) throw r2.error;
++          toast('Saved. The intro heading/paragraph need the database update first: ' + dbUpdateHint);
++          renderMagsTab();
++        } else throw e2;
++      }
+     } catch (e) { gateMsg('emMsg', 'err', e.message); $('emSave').disabled = false; $('emSave').textContent = 'Save changes'; }
+   };
+   $('emSave').scrollIntoView({ behavior: 'smooth', block: 'center' });
+diff --git a/supabase-setup.sql b/supabase-setup.sql
+index 3a12eed..5eedd82 100644
+--- a/supabase-setup.sql
++++ b/supabase-setup.sql
+@@ -20,6 +20,12 @@ create table if not exists public.app_settings (
+   mag_logo_radius int not null default 16,
+   mag_logo_border_w int not null default 2,
+   mag_logo_border_color text not null default '#C8102E',
++  hub_heading text,
++  hub_text text,
++  hub_heading_size int not null default 24,
++  hub_heading_color text not null default '#141414',
++  hub_text_size int not null default 14,
++  hub_text_color text not null default '#6b6b6b',
+   footer_text text not null default 'A Digital Publishing Platform by Pigeon Advertising & Communications.',
+   updated_at timestamptz not null default now()
+ );
+@@ -31,6 +37,12 @@ create table if not exists public.magazines (
+   logo_url text,
+   published boolean not null default true,
+   sort_order int not null default 0,
++  intro_heading text,
++  intro_text text,
++  intro_heading_size int not null default 22,
++  intro_heading_color text not null default '#141414',
++  intro_text_size int not null default 14,
++  intro_text_color text not null default '#6b6b6b',
+   created_at timestamptz not null default now()
+ );
+ 
+diff --git a/sw.js b/sw.js
+index 86ad364..7aa303e 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,5 +1,5 @@
+ /* PAC Media service worker - offline app shell */
+-const CACHE = 'pac-media-v7';
++const CACHE = 'pac-media-v8';
+ const ASSETS = [
+   './',
+   './index.html',

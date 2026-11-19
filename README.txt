@@ -17,20 +17,21 @@ FILES IN THIS FOLDER
   PATCH-NOTES.txt       What changed in this version + how to apply it.
   assets/               (empty - logos are uploaded from the Dashboard)
 
-HOW TO APPLY UPDATE v7 WITH THE PATCH FILE (pac-media-v7.patch)
-  1. Put pac-media-v7.patch inside your project folder
+HOW TO APPLY UPDATE v8 WITH THE PATCH FILE (pac-media-v8.patch)
+  1. Put pac-media-v8.patch inside your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal, run these one at a time:
        git pull
-       git apply pac-media-v7.patch
+       git apply pac-media-v8.patch
        git add .
-       git commit -m "v7: back button on magazine page, no duplicate name"
+       git commit -m "v8: intro heading and paragraph on hub and magazine pages"
        git push
   3. Reload the app on your phone twice (first load fetches the new
      version, the second shows it).
-  4. If you have not run database-update.sql in the Supabase SQL
-     Editor yet, run it once - it unlocks the logo style settings
-     and locks the database to your admin account only.
+  4. Run database-update.sql in the Supabase SQL Editor if you have
+     not already - it unlocks the logo style settings, the new
+     intro heading/paragraph fields, and locks the database to
+     your admin account only.
   NOTE: the patch never touches config.js, so your keys stay safe.
   icons/                App icons shown on phone home screens.
 
