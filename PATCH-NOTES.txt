@@ -1,62 +1,47 @@
-PAC MEDIA - UPDATE v5 (November 2026) - PATCH NOTES
+PAC MEDIA - UPDATE v6 (November 2026) - PATCH NOTES
 ===================================================
 
 HOW TO APPLY (git patch)
-  1. Save pac-media-v5.patch into your project folder
+  1. Save pac-media-v6.patch into your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal:
        git pull
-       git apply pac-media-v5.patch
+       git apply pac-media-v6.patch
        git add .
-       git commit -m "v5: install banner back, fullscreen flipbook"
+       git commit -m "v6: clean fullscreen flipbook, no overlay buttons"
        git push
   3. Reload the app on your phone twice (first load fetches the new
      version, the second shows it).
 
   The patch does NOT touch config.js - your keys stay as they are.
 
-WHAT'S FIXED IN v5
+WHAT'S CHANGED IN v6
 
-  Install banner is back - in the browser too
-  - Cause found: the app permanently remembered "this person has
-    installed before", and that memory made it hide the banner
-    everywhere, forever, even in the normal browser.
-  - That memory is gone. The install offer now appears on every
-    visit in the browser until the app is actually installed - or
-    until you close it with the X (then it stays closed just for
-    that visit).
-  - In the installed app itself the banner still never appears
-    (that is by design - you are already using the app).
-  - Where the browser can offer the one-tap install dialog, the
-    banner button opens it; otherwise it opens clear step-by-step
-    install instructions for Android and iPhone.
+  The flipbook screen is now completely clean
+  - The floating "<- Back" and "Open ->" buttons are gone. They
+    covered parts of the magazine pages.
+  - The popup "If the magazine does not appear..." is gone too.
+    You confirmed the flipbook opens fine, so there is nothing to
+    warn about - and nothing sits over the magazine anymore.
+  - Tapping "Read Issue" now shows ONLY the flipbook, full screen,
+    edge to edge, with the flipbook's own buttons (zoom, page
+    navigation, thumbnails, share...) all visible and unobstructed.
+  - While the magazine loads, a "Loading magazine..." screen shows
+    briefly and disappears by itself the moment the flipbook is
+    ready. That is not a popup - it never covers a loaded page.
 
-  "Read Issue" now opens the flipbook FULLSCREEN
-  - Tapping a magazine cover no longer shows a half-page reader
-    squeezed under a header, a cover image and bars. The flipbook
-    now fills the entire screen edge to edge, exactly like the
-    source flipbook site, so all of the flipbook's own buttons
-    (zoom, page navigation, thumbnails, sound, share...) are
-    visible and usable.
-  - Two small floating buttons stay out of the way on top:
-    "<- Back" (left) returns to the magazine page and "Open ->"
-    (right) opens the flipbook in a browser tab if the host ever
-    refuses to embed.
-  - Bottom navigation and the footer hide themselves while reading
-    and come back when you return to the magazine.
+  How to get back to the magazine page
+  - Use your phone's normal Back: the system back button/gesture
+    (Android), or swipe from the left edge (iPhone in Safari).
+    In the installed Android app the back button returns from the
+    flipbook to the magazine page, exactly as before.
 
-  Under the hood
-  - Service worker cache bumped to v5 (every device picks this up
+CARRIED FROM v5 (already in your app)
+  - Install banner shows on every visit in the normal browser
+    (Android gets the one-tap Install dialog; other phones get
+    step-by-step instructions). It never appears inside the
+    installed app, and the X closes it just for that visit.
+  - Bottom navigation and the footer hide while reading and come
+    back on the magazine page.
+  - Service worker cache bumped to v6 (every device picks this up
     with two reloads).
-
-CARRIED FROM v4 (already in your app)
-  - Red strip with the small square logo on every page, no
-    "PAC MEDIA" text heading.
-  - Magazine logos directly on the page (no red background) with
-    configurable rounded border.
-  - Working banner X button and Install button; reader loading
-    cover disappears when the flipbook is ready; no more raw
-    "&#8230;" text.
-  - Splash logo no longer resizes mid-load; splash height honoured.
-  - Inter font across the app; database locked to your admin
-    account.

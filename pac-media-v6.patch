@@ -1,0 +1,179 @@
+diff --git a/PATCH-NOTES.txt b/PATCH-NOTES.txt
+index 68fc488..c42f0b7 100644
+--- a/PATCH-NOTES.txt
++++ b/PATCH-NOTES.txt
+@@ -1,62 +1,47 @@
+-PAC MEDIA - UPDATE v5 (November 2026) - PATCH NOTES
++PAC MEDIA - UPDATE v6 (November 2026) - PATCH NOTES
+ ===================================================
+ 
+ HOW TO APPLY (git patch)
+-  1. Save pac-media-v5.patch into your project folder
++  1. Save pac-media-v6.patch into your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal:
+        git pull
+-       git apply pac-media-v5.patch
++       git apply pac-media-v6.patch
+        git add .
+-       git commit -m "v5: install banner back, fullscreen flipbook"
++       git commit -m "v6: clean fullscreen flipbook, no overlay buttons"
+        git push
+   3. Reload the app on your phone twice (first load fetches the new
+      version, the second shows it).
+ 
+   The patch does NOT touch config.js - your keys stay as they are.
+ 
+-WHAT'S FIXED IN v5
++WHAT'S CHANGED IN v6
+ 
+-  Install banner is back - in the browser too
+-  - Cause found: the app permanently remembered "this person has
+-    installed before", and that memory made it hide the banner
+-    everywhere, forever, even in the normal browser.
+-  - That memory is gone. The install offer now appears on every
+-    visit in the browser until the app is actually installed - or
+-    until you close it with the X (then it stays closed just for
+-    that visit).
+-  - In the installed app itself the banner still never appears
+-    (that is by design - you are already using the app).
+-  - Where the browser can offer the one-tap install dialog, the
+-    banner button opens it; otherwise it opens clear step-by-step
+-    install instructions for Android and iPhone.
++  The flipbook screen is now completely clean
++  - The floating "<- Back" and "Open ->" buttons are gone. They
++    covered parts of the magazine pages.
++  - The popup "If the magazine does not appear..." is gone too.
++    You confirmed the flipbook opens fine, so there is nothing to
++    warn about - and nothing sits over the magazine anymore.
++  - Tapping "Read Issue" now shows ONLY the flipbook, full screen,
++    edge to edge, with the flipbook's own buttons (zoom, page
++    navigation, thumbnails, share...) all visible and unobstructed.
++  - While the magazine loads, a "Loading magazine..." screen shows
++    briefly and disappears by itself the moment the flipbook is
++    ready. That is not a popup - it never covers a loaded page.
+ 
+-  "Read Issue" now opens the flipbook FULLSCREEN
+-  - Tapping a magazine cover no longer shows a half-page reader
+-    squeezed under a header, a cover image and bars. The flipbook
+-    now fills the entire screen edge to edge, exactly like the
+-    source flipbook site, so all of the flipbook's own buttons
+-    (zoom, page navigation, thumbnails, sound, share...) are
+-    visible and usable.
+-  - Two small floating buttons stay out of the way on top:
+-    "<- Back" (left) returns to the magazine page and "Open ->"
+-    (right) opens the flipbook in a browser tab if the host ever
+-    refuses to embed.
+-  - Bottom navigation and the footer hide themselves while reading
+-    and come back when you return to the magazine.
++  How to get back to the magazine page
++  - Use your phone's normal Back: the system back button/gesture
++    (Android), or swipe from the left edge (iPhone in Safari).
++    In the installed Android app the back button returns from the
++    flipbook to the magazine page, exactly as before.
+ 
+-  Under the hood
+-  - Service worker cache bumped to v5 (every device picks this up
++CARRIED FROM v5 (already in your app)
++  - Install banner shows on every visit in the normal browser
++    (Android gets the one-tap Install dialog; other phones get
++    step-by-step instructions). It never appears inside the
++    installed app, and the X closes it just for that visit.
++  - Bottom navigation and the footer hide while reading and come
++    back on the magazine page.
++  - Service worker cache bumped to v6 (every device picks this up
+     with two reloads).
+-
+-CARRIED FROM v4 (already in your app)
+-  - Red strip with the small square logo on every page, no
+-    "PAC MEDIA" text heading.
+-  - Magazine logos directly on the page (no red background) with
+-    configurable rounded border.
+-  - Working banner X button and Install button; reader loading
+-    cover disappears when the flipbook is ready; no more raw
+-    "&#8230;" text.
+-  - Splash logo no longer resizes mid-load; splash height honoured.
+-  - Inter font across the app; database locked to your admin
+-    account.
+diff --git a/README.txt b/README.txt
+index 27e6f57..1061732 100644
+--- a/README.txt
++++ b/README.txt
+@@ -17,14 +17,14 @@ FILES IN THIS FOLDER
+   PATCH-NOTES.txt       What changed in this version + how to apply it.
+   assets/               (empty - logos are uploaded from the Dashboard)
+ 
+-HOW TO APPLY UPDATE v5 WITH THE PATCH FILE (pac-media-v5.patch)
+-  1. Put pac-media-v5.patch inside your project folder
++HOW TO APPLY UPDATE v6 WITH THE PATCH FILE (pac-media-v6.patch)
++  1. Put pac-media-v6.patch inside your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal, run these one at a time:
+        git pull
+-       git apply pac-media-v5.patch
++       git apply pac-media-v6.patch
+        git add .
+-       git commit -m "v5: install banner back, fullscreen flipbook"
++       git commit -m "v6: clean fullscreen flipbook, no overlay buttons"
+        git push
+   3. Reload the app on your phone twice (first load fetches the new
+      version, the second shows it).
+diff --git a/index.html b/index.html
+index c993e26..e63e3ef 100644
+--- a/index.html
++++ b/index.html
+@@ -94,14 +94,9 @@ body.readerview{overflow:hidden}
+ body.readerview footer.pagefoot{display:none!important}
+ body.readerview #bottomNav{display:none!important}
+ .reader{position:fixed;inset:0;z-index:70;background:#141414;display:flex;flex-direction:column}
+-.reader-pill{position:absolute;z-index:6;display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.94);color:var(--red);font-weight:700;font-size:13px;padding:9px 14px;border-radius:99px;box-shadow:0 2px 10px rgba(0,0,0,.25);white-space:nowrap;transition:transform .12s ease}
+-.reader-pill:active{transform:scale(.96)}
+-.reader-back{top:calc(10px + env(safe-area-inset-top,0px));left:10px}
+-.reader-open{top:calc(10px + env(safe-area-inset-top,0px));right:10px}
+ .reader-frame{position:relative;flex:1;min-height:0}
+ .reader-frame iframe{width:100%;height:100%;border:0;background:#141414}
+ .frame-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#e8e8e8;font-size:13px;background:#141414}
+-.frame-hint{position:absolute;left:16px;right:16px;bottom:14px;padding:10px 12px;background:#fff7f7;border:1px solid var(--red);color:var(--ink);font-size:12px;border-radius:10px;line-height:1.5}
+ 
+ /* Admin */
+ .adminbox{max-width:440px;margin:40px auto;padding:0 20px}
+@@ -510,24 +505,20 @@ async function renderReader(id, epoch) {
+       box.innerHTML = '<div class="empty"><div class="card"><h3>Issue not available</h3><p>This issue is not published.</p></div></div>';
+       return;
+     }
+-    const backHref = (iss.magazines && iss.magazines.slug) ? '#/magazine/' + encodeURIComponent(iss.magazines.slug) : '#/';
+-    // Fullscreen flipbook: no header, no cover, no bars - the magazine
+-    // gets the entire screen so the flipbook's own buttons all fit.
++    // Fullscreen flipbook, completely clean: no header, no cover, no bars,
++    // no floating buttons, no popups. The magazine is all there is - the
++    // flipbook's own buttons all fit and nothing covers the pages.
+     box.innerHTML =
+       '<div class="reader">' +
+-        '<a class="reader-pill reader-back" href="' + backHref + '">&larr; Back</a>' +
+-        '<a class="reader-pill reader-open" href="' + esc(iss.flipbook_url) + '" target="_blank" rel="noopener">Open &#8599;</a>' +
+         '<div class="reader-frame">' +
+           '<iframe id="flipFrame" src="' + esc(iss.flipbook_url) + '" title="' + esc(iss.title) + '" allow="fullscreen; autoplay"></iframe>' +
+           '<div class="frame-loading" id="frameLoading">Loading magazine&#8230;</div>' +
+-          '<div class="frame-hint" id="frameHint" hidden>If the magazine does not appear, this flipbook host blocks embedding. Tap <b>Open &#8599;</b> (top right) to read it in a new tab.</div>' +
+         '</div>' +
+       '</div>';
+-    const fr = $('flipFrame'), fl = $('frameLoading'), fh = $('frameHint');
++    const fr = $('flipFrame'), fl = $('frameLoading');
+     let loaded = false;
+     fr.addEventListener('load', () => { loaded = true; fl.hidden = true; });
+     setTimeout(() => { if (!loaded) fl.textContent = 'Still loading…'; }, 2600);
+-    setTimeout(() => { if (!loaded) fh.hidden = false; }, 4500);
+   } catch (e) { box.innerHTML = stripHTML() + errView(e.message); }
+ }
+ /* ---------- admin gate: one-time setup, then private login ---------- */
+diff --git a/sw.js b/sw.js
+index 467e6c0..71309b0 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,5 +1,5 @@
+ /* PAC Media service worker - offline app shell */
+-const CACHE = 'pac-media-v5';
++const CACHE = 'pac-media-v6';
+ const ASSETS = [
+   './',
+   './index.html',
