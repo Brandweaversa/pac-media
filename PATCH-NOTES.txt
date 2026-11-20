@@ -1,56 +1,54 @@
-PAC MEDIA - UPDATE v8 (November 2026) - PATCH NOTES
+PAC MEDIA - UPDATE v9 (November 2026) - PATCH NOTES
 ===================================================
 
 HOW TO APPLY (git patch)
-  1. Save pac-media-v8.patch into your project folder
+  1. Save pac-media-v9.patch into your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal:
        git pull
-       git apply pac-media-v8.patch
+       git apply pac-media-v9.patch
        git add .
-       git commit -m "v8: intro heading and paragraph on hub and magazine pages"
+       git commit -m "v9: install page for Android, iPhone and desktop"
        git push
   3. Reload the app on your phone twice (first load fetches the new
      version, the second shows it).
 
   The patch does NOT touch config.js - your keys stay as they are.
 
-IMPORTANT - ONE-TIME DATABASE STEP
-  The intro heading and paragraph are stored in new database
-  columns. Run database-update.sql once in the Supabase SQL
-  Editor (paste the ENTIRE file > Run). Until you run it, the app
-  works exactly as before and saving an intro shows a clear
-  message telling you to run the file first. Nothing breaks.
+WHAT'S NEW IN v9
 
-WHAT'S NEW IN v8
+  A real install page: install.html
+  - Share this address with readers, clients and staff:
+      your app address + /install.html
+    (for example  https://your-site.vercel.app/install.html)
+  - The page looks like an app-store listing for PAC Media: the
+    app icon, the "Publishing Brands. Connecting Audiences."
+    tagline and the Pigeon Advertising & Communications company
+    paragraph, features, version info.
+  - One big Install button that works on every phone:
+      * Android (Chrome): opens the real one-tap install dialog -
+        PAC Media lands on the home screen with its own icon.
+      * iPhone / iPad (Safari): shows the 3-step Add to Home
+        Screen guide, with the reader's own device highlighted.
+      * Desktop (Chrome/Edge): installs PAC Media as its own
+        window. Other browsers get manual steps.
+  - The page knows when it is already running inside the
+    installed app - then it simply shows "Open PAC Media" and
+    takes the reader into the magazines.
+  - Why this beats the browser version: readers never browse to
+    the app address by accident - they install once and open PAC
+    Media from its own icon, fullscreen, no address bar, working
+    offline. Send them the /install.html link, not the app link.
+  - A Share button lets anyone pass the install page along
+    (WhatsApp, SMS, email - the phone's share sheet).
 
-  Custom heading and paragraph on the magazines hub
-  - Dashboard > Branding tab > "Hub intro" card.
-  - Type a heading and a paragraph, choose the font size and the
-    color of each (color picker or hex code). Save.
-  - They appear at the top of the all-magazines page, above the
-    magazine logos, centered.
-  - Leave the fields empty and nothing shows - the hub stays
-    exactly as it was.
+  Under the hood
+  - install.html joins the service worker's offline cache
+    (cache bumped to v9 - two reloads pick it up).
 
-  Custom heading and paragraph on every magazine page
-  - Dashboard > Magazines > Edit (on the magazine) - the intro
-    fields sit under the name and logo.
-  - Each magazine has its own heading + paragraph with their own
-    size and color. They appear between the magazine logo and the
-    list of issues.
-  - Leave them empty and that magazine simply has no intro.
-
-  Sizes and colors are in pixels / hex color, with sensible
-  defaults (heading 24px dark, paragraph 14px grey) if you leave
-  the size/color fields alone.
-
-CARRIED FROM v7 (already in your app)
-  - Back button on the magazine page; no duplicate magazine name
-    under the logo.
-  - Flipbook opens clean and fullscreen: no floating Back/Open
-    buttons, no popup. Back out with the phone's system back.
-  - Install banner shows on every visit in the normal browser;
-    never inside the installed app; X closes it for that visit.
-  - Service worker cache bumped to v8 (every device picks this up
-    with two reloads).
+CARRIED FROM v8 (already in your app)
+  - Intro heading + paragraph (own font size and color) on the
+    hub and on every magazine page; run database-update.sql once
+    if you have not yet.
+  - Back button on the magazine page; clean fullscreen flipbook.
+  - Install banner on every visit in the normal browser.

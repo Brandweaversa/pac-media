@@ -17,21 +17,21 @@ FILES IN THIS FOLDER
   PATCH-NOTES.txt       What changed in this version + how to apply it.
   assets/               (empty - logos are uploaded from the Dashboard)
 
-HOW TO APPLY UPDATE v8 WITH THE PATCH FILE (pac-media-v8.patch)
-  1. Put pac-media-v8.patch inside your project folder
+HOW TO APPLY UPDATE v9 WITH THE PATCH FILE (pac-media-v9.patch)
+  1. Put pac-media-v9.patch inside your project folder
      (C:\Users\User\Documents\pac).
   2. In the VS Code terminal, run these one at a time:
        git pull
-       git apply pac-media-v8.patch
+       git apply pac-media-v9.patch
        git add .
-       git commit -m "v8: intro heading and paragraph on hub and magazine pages"
+       git commit -m "v9: install page for Android, iPhone and desktop"
        git push
   3. Reload the app on your phone twice (first load fetches the new
      version, the second shows it).
-  4. Run database-update.sql in the Supabase SQL Editor if you have
-     not already - it unlocks the logo style settings, the new
-     intro heading/paragraph fields, and locks the database to
-     your admin account only.
+  4. Share the install page with readers: your app address plus
+     /install.html (for example https://your-site.vercel.app/install.html).
+  5. If you have not run database-update.sql yet, run it once - it
+     unlocks the logo styles and the intro heading/paragraph fields.
   NOTE: the patch never touches config.js, so your keys stay safe.
   icons/                App icons shown on phone home screens.
 

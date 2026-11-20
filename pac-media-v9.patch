@@ -1,0 +1,770 @@
+diff --git a/PATCH-NOTES.txt b/PATCH-NOTES.txt
+index fa54963..41cdc21 100644
+--- a/PATCH-NOTES.txt
++++ b/PATCH-NOTES.txt
+@@ -1,56 +1,54 @@
+-PAC MEDIA - UPDATE v8 (November 2026) - PATCH NOTES
++PAC MEDIA - UPDATE v9 (November 2026) - PATCH NOTES
+ ===================================================
+ 
+ HOW TO APPLY (git patch)
+-  1. Save pac-media-v8.patch into your project folder
++  1. Save pac-media-v9.patch into your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal:
+        git pull
+-       git apply pac-media-v8.patch
++       git apply pac-media-v9.patch
+        git add .
+-       git commit -m "v8: intro heading and paragraph on hub and magazine pages"
++       git commit -m "v9: install page for Android, iPhone and desktop"
+        git push
+   3. Reload the app on your phone twice (first load fetches the new
+      version, the second shows it).
+ 
+   The patch does NOT touch config.js - your keys stay as they are.
+ 
+-IMPORTANT - ONE-TIME DATABASE STEP
+-  The intro heading and paragraph are stored in new database
+-  columns. Run database-update.sql once in the Supabase SQL
+-  Editor (paste the ENTIRE file > Run). Until you run it, the app
+-  works exactly as before and saving an intro shows a clear
+-  message telling you to run the file first. Nothing breaks.
+-
+-WHAT'S NEW IN v8
+-
+-  Custom heading and paragraph on the magazines hub
+-  - Dashboard > Branding tab > "Hub intro" card.
+-  - Type a heading and a paragraph, choose the font size and the
+-    color of each (color picker or hex code). Save.
+-  - They appear at the top of the all-magazines page, above the
+-    magazine logos, centered.
+-  - Leave the fields empty and nothing shows - the hub stays
+-    exactly as it was.
+-
+-  Custom heading and paragraph on every magazine page
+-  - Dashboard > Magazines > Edit (on the magazine) - the intro
+-    fields sit under the name and logo.
+-  - Each magazine has its own heading + paragraph with their own
+-    size and color. They appear between the magazine logo and the
+-    list of issues.
+-  - Leave them empty and that magazine simply has no intro.
+-
+-  Sizes and colors are in pixels / hex color, with sensible
+-  defaults (heading 24px dark, paragraph 14px grey) if you leave
+-  the size/color fields alone.
+-
+-CARRIED FROM v7 (already in your app)
+-  - Back button on the magazine page; no duplicate magazine name
+-    under the logo.
+-  - Flipbook opens clean and fullscreen: no floating Back/Open
+-    buttons, no popup. Back out with the phone's system back.
+-  - Install banner shows on every visit in the normal browser;
+-    never inside the installed app; X closes it for that visit.
+-  - Service worker cache bumped to v8 (every device picks this up
+-    with two reloads).
++WHAT'S NEW IN v9
++
++  A real install page: install.html
++  - Share this address with readers, clients and staff:
++      your app address + /install.html
++    (for example  https://your-site.vercel.app/install.html)
++  - The page looks like an app-store listing for PAC Media: the
++    app icon, the "Publishing Brands. Connecting Audiences."
++    tagline and the Pigeon Advertising & Communications company
++    paragraph, features, version info.
++  - One big Install button that works on every phone:
++      * Android (Chrome): opens the real one-tap install dialog -
++        PAC Media lands on the home screen with its own icon.
++      * iPhone / iPad (Safari): shows the 3-step Add to Home
++        Screen guide, with the reader's own device highlighted.
++      * Desktop (Chrome/Edge): installs PAC Media as its own
++        window. Other browsers get manual steps.
++  - The page knows when it is already running inside the
++    installed app - then it simply shows "Open PAC Media" and
++    takes the reader into the magazines.
++  - Why this beats the browser version: readers never browse to
++    the app address by accident - they install once and open PAC
++    Media from its own icon, fullscreen, no address bar, working
++    offline. Send them the /install.html link, not the app link.
++  - A Share button lets anyone pass the install page along
++    (WhatsApp, SMS, email - the phone's share sheet).
++
++  Under the hood
++  - install.html joins the service worker's offline cache
++    (cache bumped to v9 - two reloads pick it up).
++
++CARRIED FROM v8 (already in your app)
++  - Intro heading + paragraph (own font size and color) on the
++    hub and on every magazine page; run database-update.sql once
++    if you have not yet.
++  - Back button on the magazine page; clean fullscreen flipbook.
++  - Install banner on every visit in the normal browser.
+diff --git a/README.txt b/README.txt
+index 7ea1fe2..8ea2d91 100644
+--- a/README.txt
++++ b/README.txt
+@@ -17,21 +17,21 @@ FILES IN THIS FOLDER
+   PATCH-NOTES.txt       What changed in this version + how to apply it.
+   assets/               (empty - logos are uploaded from the Dashboard)
+ 
+-HOW TO APPLY UPDATE v8 WITH THE PATCH FILE (pac-media-v8.patch)
+-  1. Put pac-media-v8.patch inside your project folder
++HOW TO APPLY UPDATE v9 WITH THE PATCH FILE (pac-media-v9.patch)
++  1. Put pac-media-v9.patch inside your project folder
+      (C:\Users\User\Documents\pac).
+   2. In the VS Code terminal, run these one at a time:
+        git pull
+-       git apply pac-media-v8.patch
++       git apply pac-media-v9.patch
+        git add .
+-       git commit -m "v8: intro heading and paragraph on hub and magazine pages"
++       git commit -m "v9: install page for Android, iPhone and desktop"
+        git push
+   3. Reload the app on your phone twice (first load fetches the new
+      version, the second shows it).
+-  4. Run database-update.sql in the Supabase SQL Editor if you have
+-     not already - it unlocks the logo style settings, the new
+-     intro heading/paragraph fields, and locks the database to
+-     your admin account only.
++  4. Share the install page with readers: your app address plus
++     /install.html (for example https://your-site.vercel.app/install.html).
++  5. If you have not run database-update.sql yet, run it once - it
++     unlocks the logo styles and the intro heading/paragraph fields.
+   NOTE: the patch never touches config.js, so your keys stay safe.
+   icons/                App icons shown on phone home screens.
+ 
+diff --git a/install.html b/install.html
+new file mode 100644
+index 0000000..6bd0d76
+--- /dev/null
++++ b/install.html
+@@ -0,0 +1,613 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++    <meta charset="UTF-8">
++    <meta name="viewport" content="width=device-width, initial-scale=1.0">
++    <title>Install PAC Media — Publishing Brands. Connecting Audiences.</title>
++    <meta name="description" content="Install the PAC Media app — every magazine from Pigeon Advertising & Communications in one place. Free, no app store needed.">
++    <meta name="theme-color" content="#C8102E">
++    <link rel="manifest" href="manifest.json">
++    <link rel="icon" href="icons/icon-192.png">
++    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
++    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
++    <link rel="preconnect" href="https://fonts.googleapis.com">
++    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
++    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
++    <style>
++        :root { --red: #C8102E; --red-dark: #A00D24; --ink: #1a202c; --muted: #757575; --line: #e0e0e0; }
++        * { margin: 0; padding: 0; box-sizing: border-box; }
++        body {
++            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
++            background: #FAFAFA;
++            color: #212121;
++            line-height: 1.5;
++        }
++
++        /* ---------- install overlay ---------- */
++        .pac-install-overlay {
++            display: none;
++            position: fixed;
++            inset: 0;
++            background: rgba(0, 0, 0, 0.95);
++            z-index: 10000;
++        }
++        .pac-install-overlay.active {
++            display: flex;
++            align-items: center;
++            justify-content: center;
++        }
++        .pac-install-content {
++            text-align: center;
++            color: white;
++            max-width: 400px;
++            padding: 0 20px;
++        }
++        .pac-install-icon {
++            width: 150px;
++            height: 150px;
++            margin: 0 auto 30px;
++            background-color: #fff;
++            border-radius: 30px;
++            display: flex;
++            align-items: center;
++            justify-content: center;
++            overflow: hidden;
++            animation: pac-pulse 2s ease-in-out infinite;
++        }
++        .pac-install-icon img { width: 100%; height: 100%; object-fit: cover; }
++        @keyframes pac-pulse {
++            0%, 100% { transform: scale(1); }
++            50% { transform: scale(1.05); }
++        }
++        .pac-install-status { font-size: clamp(19px, 5vw, 24px); font-weight: 700; margin-bottom: 10px; }
++        .pac-install-message { font-size: 14px; color: #aaa; min-height: 20px; }
++        .pac-install-dots { margin-top: 18px; }
++        .pac-install-dots span {
++            display: inline-block;
++            width: 8px; height: 8px;
++            background: var(--red);
++            border-radius: 50%;
++            margin: 0 4px;
++            animation: pac-bounce 1.4s infinite;
++        }
++        .pac-install-dots span:nth-child(2) { animation-delay: 0.2s; }
++        .pac-install-dots span:nth-child(3) { animation-delay: 0.4s; }
++        @keyframes pac-bounce {
++            0%, 100% { transform: translateY(0); }
++            50% { transform: translateY(-10px); }
++        }
++        .pac-install-done { margin-top: 18px; font-size: 15px; color: #c9f2cf; font-weight: 600; }
++        .pac-install-done i { color: #4caf50; margin-right: 8px; }
++
++        /* ---------- layout ---------- */
++        .pac-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
++        .pac-header { padding: 10px; border-radius: 18px; background: #fff; border: 1px solid var(--line); }
++        .pac-header-content {
++            max-width: 900px;
++            margin: 0 auto;
++            display: flex;
++            gap: 25px;
++            align-items: flex-start;
++        }
++        .pac-icon {
++            width: 150px; height: 150px;
++            border-radius: 20px;
++            background-color: #fff;
++            border: 1px solid var(--line);
++            display: flex; align-items: center; justify-content: center;
++            overflow: hidden;
++            flex-shrink: 0;
++        }
++        .pac-icon img { width: 100%; height: 100%; object-fit: cover; }
++        .pac-info { flex: 1; }
++        .pac-title { font-size: clamp(24px, 6vw, 32px); font-weight: 800; color: var(--ink); }
++        .pac-developer { color: var(--red); font-size: 14px; margin: 5px 0 15px 0; font-weight: 600; }
++        .pac-meta { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
++        .pac-meta-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
++        .pac-meta-item-value { font-size: 14px; font-weight: 600; color: var(--ink); }
++        .pac-meta-item-label { font-size: 12px; color: var(--muted); }
++        .pac-buttons { display: flex; flex-direction: column; }
++        .pac-btn {
++            padding: 13px 30px;
++            border: none;
++            border-radius: 10px;
++            font-size: 15px;
++            font-weight: 700;
++            cursor: pointer;
++            transition: all 0.3s ease;
++            display: flex; align-items: center; justify-content: center;
++            gap: 8px;
++            width: 100%;
++            max-width: 550px;
++            font-family: inherit;
++        }
++        .pac-btn-primary { background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%); color: white; }
++        .pac-btn-primary:hover { transform: translateY(-2px); }
++        .pac-btn-secondary { background: transparent; color: var(--red); padding: 10px 16px; width: auto; max-width: 220px; margin: 0 auto; }
++        .pac-btn-secondary:hover { color: var(--red-dark); }
++        .pac-install-note { font-size: 13px; color: var(--muted); margin-top: 14px; }
++        .pac-install-note i { color: var(--red); margin-right: 4px; }
++
++        /* ---------- tagline band (your copy) ---------- */
++        .pac-tagline {
++            background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
++            border-radius: 18px;
++            color: #fff;
++            padding: clamp(28px, 6vw, 44px) clamp(20px, 5vw, 40px);
++            margin-top: 18px;
++            text-align: center;
++        }
++        .pac-tagline h1 { font-size: clamp(24px, 6vw, 34px); font-weight: 800; line-height: 1.25; letter-spacing: -0.01em; }
++        .pac-tagline p { max-width: 760px; margin: 14px auto 0; font-size: clamp(14px, 3.5vw, 16px); line-height: 1.65; color: rgba(255,255,255,0.94); }
++
++        /* ---------- content grid ---------- */
++        .pac-content {
++            max-width: 900px;
++            margin: 0 auto;
++            padding: 40px 20px 10px;
++            display: grid;
++            grid-template-columns: 2fr 1fr;
++            gap: 40px;
++        }
++        .pac-sidebar { display: flex; flex-direction: column; gap: 30px; }
++        .pac-section-title {
++            font-size: 18px; font-weight: 700; color: var(--ink);
++            margin-bottom: 15px; padding-bottom: 10px;
++            border-bottom: 2px solid var(--line);
++        }
++        .pac-section-title i { margin-right: 8px; color: var(--red); }
++        .pac-features-list { list-style: none; }
++        .pac-features-list li {
++            padding: 9px 0;
++            display: flex; align-items: center; gap: 12px;
++            color: #424242; font-size: 15px;
++            border-bottom: 1px solid var(--line);
++        }
++        .pac-features-list li:last-child { border-bottom: none; }
++        .pac-feature-check {
++            width: 24px; height: 24px;
++            background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
++            border-radius: 50%;
++            display: flex; align-items: center; justify-content: center;
++            color: white; font-size: 12px; flex-shrink: 0;
++        }
++        .pac-badge {
++            display: inline-flex; align-items: center; gap: 8px;
++            padding: 10px 15px;
++            background: #FFEBEE; color: #B71C1C;
++            border-radius: 6px; font-size: 13px; font-weight: 600;
++        }
++        .pac-trust-box { background: #FFEBEE; padding: 15px; border-radius: 8px; }
++        .pac-trust-box p { font-size: 12px; color: #424242; margin: 0; }
++        .pac-trust-box i { color: var(--red); margin-right: 6px; }
++        .pac-trust-box p + p { margin-top: 8px !important; }
++        .pac-help-box { background: #FFEBEE; padding: 20px; border-radius: 8px; }
++        .pac-help-box h4 { font-size: 14px; color: var(--ink); margin-bottom: 10px; }
++        .pac-help-box h4 i { color: var(--red); margin-right: 8px; }
++        .pac-help-box p { font-size: 13px; color: #424242; margin: 0 0 10px 0; }
++        .pac-help-box a { color: var(--red); text-decoration: none; font-weight: 600; font-size: 13px; }
++        .pac-help-box a:hover { text-decoration: underline; }
++
++        /* ---------- install steps ---------- */
++        .pac-steps-wrap { margin-top: 30px; }
++        .pac-steps-panel {
++            background: #fff;
++            border: 1px solid #f3c3cb;
++            padding: 18px;
++            border-radius: 12px;
++            margin-bottom: 12px;
++        }
++        .pac-steps-panel summary {
++            cursor: pointer;
++            font-size: 14px;
++            font-weight: 700;
++            color: var(--ink);
++            display: flex; align-items: center; gap: 8px;
++            list-style: none;
++        }
++        .pac-steps-panel summary::-webkit-details-marker { display: none; }
++        .pac-steps-panel summary i { color: var(--red); }
++        .pac-steps-panel summary .pac-you {
++            margin-left: auto;
++            background: var(--red); color: #fff;
++            font-size: 11px; padding: 3px 9px; border-radius: 99px;
++        }
++        .pac-steps-panel ol { margin: 12px 0 0; padding-left: 20px; }
++        .pac-steps-panel li { font-size: 13px; color: #424242; margin-bottom: 8px; line-height: 1.5; }
++        .pac-steps-panel li:last-child { margin-bottom: 0; }
++        .pac-steps-panel strong { color: var(--ink); }
++
++        /* ---------- changelog ---------- */
++        .pac-changelog { background: #FFEBEE; padding: 20px; border-radius: 8px; }
++        .pac-changelog-version { font-weight: 700; color: var(--ink); margin-bottom: 10px; font-size: 14px; }
++        .pac-changelog-version i { margin-right: 6px; color: var(--red); }
++        .pac-changelog-items { list-style: none; }
++        .pac-changelog-items li { color: #424242; font-size: 13px; margin-bottom: 6px; padding-left: 18px; position: relative; }
++        .pac-changelog-items li::before { content: "•"; position: absolute; left: 0; color: var(--red); font-weight: bold; }
++
++        /* ---------- about ---------- */
++        .pac-about-section { max-width: 900px; margin: 0 auto; padding: 40px 20px; border-top: 1px solid var(--line); }
++        .pac-about-title { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
++        .pac-about-title i { color: var(--red); }
++        .pac-about-content { color: #424242; font-size: 14px; line-height: 1.65; margin-bottom: 20px; }
++        .pac-about-content p { margin-bottom: 10px; }
++        .pac-about-meta { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; background: #FFEBEE; border-radius: 18px; }
++        .pac-about-meta-item { display: flex; flex-direction: column; gap: 5px; }
++        .pac-about-meta-label { font-size: 12px; color: #757575; font-weight: 600; }
++        .pac-about-meta-value { font-size: 13px; color: var(--ink); }
++        .pac-about-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
++        .pac-tag { background: #fff; border: 1px solid var(--red); color: #424242; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
++
++        /* ---------- footer ---------- */
++        .pac-footer { background: #f8f9fa; padding: 30px 20px; margin-top: 40px; border-radius: 18px; }
++        .pac-footer-content {
++            max-width: 900px; margin: 0 auto;
++            display: flex; justify-content: space-between; align-items: center;
++            flex-wrap: wrap; gap: 20px;
++            font-size: 13px; color: #424242;
++        }
++        .pac-footer-links { display: flex; gap: 20px; }
++        .pac-footer-links a { color: var(--red); text-decoration: none; }
++        .pac-footer-links a:hover { text-decoration: underline; }
++
++        @media (max-width: 768px) {
++            .pac-header-content { flex-direction: column; align-items: center; text-align: center; }
++            .pac-icon { width: 120px; height: 120px; }
++            .pac-meta, .pac-buttons { align-items: center; }
++            .pac-content { grid-template-columns: 1fr; }
++            .pac-footer-content { justify-content: center; text-align: center; }
++        }
++    </style>
++</head>
++<body>
++
++    <!-- install overlay: shown while the real install dialog is out -->
++    <div class="pac-install-overlay" id="pac-overlay">
++        <div class="pac-install-content">
++            <div class="pac-install-icon">
++                <img src="icons/icon-192.png" alt="PAC Media">
++            </div>
++            <div class="pac-install-status" id="pac-status">Installing PAC Media</div>
++            <div class="pac-install-message" id="pac-msg">Opening the install dialog&#8230;</div>
++            <div class="pac-install-dots" id="pac-dots"><span></span><span></span><span></span></div>
++            <div class="pac-install-done" id="pac-done" hidden><i class="fas fa-circle-check"></i>Installed! Open it from your home screen.</div>
++        </div>
++    </div>
++
++    <div class="pac-container">
++
++        <!-- app header: store-style card -->
++        <div class="pac-header">
++            <div class="pac-header-content">
++                <div class="pac-icon">
++                    <img src="icons/icon-192.png" alt="PAC Media app icon">
++                </div>
++                <div class="pac-info">
++                    <h2 class="pac-title">PAC Media</h2>
++                    <p class="pac-developer"><i class="fas fa-building"></i> Pigeon Advertising &amp; Communications</p>
++                    <div class="pac-meta">
++                        <div class="pac-meta-item">
++                            <div class="pac-meta-item-value"><i class="fas fa-star" style="color: #fbbf24;"></i> Everyone</div>
++                            <div class="pac-meta-item-label">Content Rating</div>
++                        </div>
++                        <div class="pac-meta-item">
++                            <div class="pac-meta-item-value"><i class="fas fa-globe"></i> South Africa &#127474;&#127486;</div>
++                            <div class="pac-meta-item-label">Made in</div>
++                        </div>
++                        <div class="pac-meta-item">
++                            <div class="pac-meta-item-value"><i class="fas fa-mobile-alt"></i> Android &bull; iPhone &bull; Desktop</div>
++                            <div class="pac-meta-item-label">Runs on</div>
++                        </div>
++                    </div>
++                    <div class="pac-buttons">
++                        <button class="pac-btn pac-btn-primary" id="pac-install-btn">
++                            <i class="fas fa-download"></i> <span id="pac-install-label">Install App</span>
++                        </button>
++                    </div>
++                    <div class="pac-share-section" style="text-align:center; margin-top:8px;">
++                        <button class="pac-btn pac-btn-secondary" id="pac-share-btn">
++                            <i class="fas fa-share-alt"></i> <span id="pac-share-label">Share</span>
++                        </button>
++                    </div>
++                    <p class="pac-install-note" id="pac-install-note">
++                        <i class="fas fa-check-circle"></i> Free &mdash; no ads, no tracking. Installs straight from this page: no app store, no APK file.
++                    </p>
++                </div>
++            </div>
++        </div>
++
++        <!-- tagline band -->
++        <section class="pac-tagline">
++            <h1>Publishing Brands. Connecting Audiences.</h1>
++            <p>Pigeon Advertising &amp; Communications is a leading publishing house in the SADC region, producing targeted print and digital publications across travel, tourism, property, lifestyle, transport and business. From editorial and design to advertising sales, production, distribution and digital amplification, we manage the full publishing journey.</p>
++        </section>
++
++        <div class="pac-content">
++            <div>
++                <div>
++                    <h3 class="pac-section-title"><i class="fas fa-star"></i> Why Install the App</h3>
++                    <ul class="pac-features-list">
++                        <li><div class="pac-feature-check"><i class="fas fa-check"></i></div> Every PAC Media magazine in one place</li>
++                        <li><div class="pac-feature-check"><i class="fas fa-check"></i></div> New issues appear automatically &mdash; always up to date</li>
++                        <li><div class="pac-feature-check"><i class="fas fa-check"></i></div> Fullscreen flipbook reading, just like print</li>
++                        <li><div class="pac-feature-check"><i class="fas fa-check"></i></div> Works offline after first load &mdash; fast on any connection</li>
++                        <li><div class="pac-feature-check"><i class="fas fa-check"></i></div> Its own icon on your home screen &mdash; opens like any app</li>
++                        <li><div class="pac-feature-check"><i class="fas fa-check"></i></div> Installs in seconds, straight from this page</li>
++                        <li><div class="pac-feature-check"><i class="fas fa-check"></i></div> Free &mdash; no ads, no tracking</li>
++                    </ul>
++                </div>
++
++                <div class="pac-steps-wrap">
++                    <h3 class="pac-section-title"><i class="fas fa-mobile-screen"></i> How to Install</h3>
++                    <details class="pac-steps-panel" id="steps-android">
++                        <summary><i class="fab fa-android"></i> On Android <span class="pac-you" id="you-android" hidden>Your device</span></summary>
++                        <ol>
++                            <li>Tap the <strong>Install App</strong> button above.</li>
++                            <li>Your browser shows a small <strong>&ldquo;Install app&rdquo;</strong> confirmation &mdash; tap <strong>Install</strong>.</li>
++                            <li>PAC Media lands on your home screen like any app. Open it from there &mdash; not from the browser tab.</li>
++                        </ol>
++                    </details>
++                    <details class="pac-steps-panel" id="steps-ios">
++                        <summary><i class="fab fa-apple"></i> On iPhone / iPad <span class="pac-you" id="you-ios" hidden>Your device</span></summary>
++                        <ol>
++                            <li>Tap the <strong>Share</strong> button in Safari &mdash; the square with the arrow pointing up.</li>
++                            <li>Scroll down the list and tap <strong>Add to Home Screen</strong>.</li>
++                            <li>Tap <strong>Add</strong> in the top corner. PAC Media appears on your home screen.</li>
++                        </ol>
++                    </details>
++                    <details class="pac-steps-panel" id="steps-desktop">
++                        <summary><i class="fas fa-desktop"></i> On desktop <span class="pac-you" id="you-desktop" hidden>Your device</span></summary>
++                        <ol>
++                            <li>Click the <strong>Install App</strong> button above.</li>
++                            <li>Confirm <strong>Install</strong> in the dialog that appears.</li>
++                            <li>PAC Media opens in its own window &mdash; find it later in your taskbar or dock.</li>
++                        </ol>
++                    </details>
++                </div>
++
++                <div style="margin-top: 30px;">
++                    <h3 class="pac-section-title"><i class="fas fa-newspaper"></i> What's New</h3>
++                    <div class="pac-changelog">
++                        <div class="pac-changelog-version"><i class="fas fa-tag"></i> Version 8.0 (Latest)</div>
++                        <ul class="pac-changelog-items">
++                            <li>Clean fullscreen flipbook &mdash; nothing covers the magazine</li>
++                            <li>Custom intro headings and paragraphs on the hub and every magazine</li>
++                            <li>Back button on magazine pages, no duplicate magazine name</li>
++                            <li>One-tap install &mdash; no app store needed</li>
++                            <li>Faster loads with the offline app shell</li>
++                            <li>Brand-red splash screen with your logo</li>
++                        </ul>
++                    </div>
++                </div>
++            </div>
++
++            <div class="pac-sidebar">
++                <div>
++                    <div class="pac-badge">
++                        <i class="fas fa-lock"></i>
++                        <span>Official Install</span>
++                    </div>
++                </div>
++
++                <div class="pac-trust-box">
++                    <p><i class="fas fa-check"></i> <strong>Installed straight from the official PAC Media site</strong></p>
++                    <p><i class="fas fa-shield-alt"></i> No app store, no APK file, no warnings &mdash; and always the latest version, automatically.</p>
++                </div>
++
++                <div style="background: #FFEBEE; padding: 20px; border-radius: 8px;">
++                    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #1a202c;">
++                        <i class="fas fa-mobile-screen-button" style="color: #C8102E; margin-right: 8px;"></i> One app, all devices
++                    </h4>
++                    <p style="font-size: 13px; color: #424242; margin: 0;">
++                        PAC Media installs on Android phones, iPhone, iPad, Windows, Mac and Linux &mdash; same magazines, same place, everywhere.
++                    </p>
++                </div>
++
++                <div class="pac-help-box">
++                    <h4><i class="fas fa-headset"></i> Need Help?</h4>
++                    <p>Questions about PAC Media or your magazines? Talk to the team at Pigeon Advertising &amp; Communications.</p>
++                    <!-- Replace this link with your real contact (email or WhatsApp) when ready -->
++                    <a href="./index.html"><i class="fas fa-arrow-right"></i> Open PAC Media</a>
++                </div>
++            </div>
++        </div>
++
++        <div class="pac-about-section">
++            <h2 class="pac-about-title">
++                <i class="fas fa-circle-info"></i> About this app
++            </h2>
++            <div class="pac-about-content">
++                <p>PAC Media brings together the full family of magazines published by Pigeon Advertising &amp; Communications in one free app &mdash; travel, tourism, property, lifestyle, transport and business titles, side by side.</p>
++                <p>Browse the shelves, open an issue and read it fullscreen with a realistic flipbook, exactly like the printed edition. New issues appear the moment they are published, and the app keeps itself up to date automatically.</p>
++                <p>Install it directly from this page &mdash; no app store, nothing to sideload. The PAC Media icon lands on your home screen and opens like any other app.</p>
++            </div>
++            <div class="pac-about-meta">
++                <div class="pac-about-meta-item">
++                    <span class="pac-about-meta-label">Updated on</span>
++                    <span class="pac-about-meta-value">November 2026</span>
++                </div>
++                <div class="pac-about-meta-item">
++                    <span class="pac-about-meta-label">Size</span>
++                    <span class="pac-about-meta-value">Under 1 MB</span>
++                </div>
++                <div class="pac-about-meta-item">
++                    <span class="pac-about-meta-label">Version</span>
++                    <span class="pac-about-meta-value">8.0</span>
++                </div>
++                <div class="pac-about-meta-item">
++                    <span class="pac-about-meta-label">Developer</span>
++                    <span class="pac-about-meta-value">Pigeon Advertising &amp; Communications</span>
++                </div>
++                <div class="pac-about-meta-item">
++                    <span class="pac-about-meta-label">Requires</span>
++                    <span class="pac-about-meta-value">Any modern phone or computer</span>
++                </div>
++            </div>
++            <div class="pac-about-tags">
++                <span class="pac-tag">Publishing</span>
++                <span class="pac-tag">Magazines</span>
++                <span class="pac-tag">Travel &amp; Tourism</span>
++                <span class="pac-tag">Property</span>
++                <span class="pac-tag">Lifestyle</span>
++                <span class="pac-tag">Business</span>
++            </div>
++        </div>
++
++        <div class="pac-footer">
++            <div class="pac-footer-content">
++                <div><i class="fas fa-copyright"></i> 2026 Pigeon Advertising &amp; Communications. Publishing Brands. Connecting Audiences.</div>
++                <div class="pac-footer-links">
++                    <a href="./index.html"><i class="fas fa-arrow-right"></i> Open PAC Media</a>
++                </div>
++            </div>
++        </div>
++    </div>
++
++<script>
++/* PAC Media install page - triggers the real PWA install on Android and
++   desktop Chrome/Edge, and guides Add to Home Screen on iPhone/iPad. */
++
++var pacDeferredInstall = null;
++var pacInstalled = false;
++var pacPlatform = null;
++var pacStandalone = false;
++
++/* Pure platform detection - easy to test */
++function detectPlatform(ua, standalone) {
++    ua = String(ua || '');
++    var iOS = /iPad|iPhone|iPod/i.test(ua) || (/Macintosh/i.test(ua) && typeof document !== 'undefined' && 'ontouchend' in document);
++    if (iOS) return { os: 'ios', label: 'iPhone / iPad' };
++    if (/Android/i.test(ua)) return { os: 'android', label: 'Android' };
++    return { os: 'desktop', label: 'Desktop' };
++}
++function pacIsStandalone() {
++    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
++        window.navigator.standalone === true;
++}
++function pacPrimeSteps(os) {
++    var map = { android: 'steps-android', ios: 'steps-ios', desktop: 'steps-desktop' };
++    var el = document.getElementById(map[os] || 'steps-desktop');
++    if (el) el.open = true;
++}
++function pacShowOverlay(msg) {
++    var o = document.getElementById('pac-overlay');
++    o.classList.add('active');
++    document.getElementById('pac-status').textContent = 'Installing PAC Media';
++    document.getElementById('pac-msg').textContent = msg;
++    document.getElementById('pac-dots').hidden = false;
++    document.getElementById('pac-done').hidden = true;
++}
++function pacHideOverlay() {
++    document.getElementById('pac-overlay').classList.remove('active');
++}
++/* Swap the header button into "open the app" mode once installed */
++function pacSetInstalledUI() {
++    pacInstalled = true;
++    var btn = document.getElementById('pac-install-btn');
++    var label = document.getElementById('pac-install-label');
++    label.textContent = 'Open PAC Media';
++    btn.className = 'pac-btn pac-btn-secondary';
++    var note = document.getElementById('pac-install-note');
++    note.innerHTML = '<i class="fas fa-circle-check"></i> PAC Media is installed \u2714 Open it from your home screen \u2014 not the browser tab.';
++}
++
++async function pacStartInstall() {
++    if (pacStandalone) { window.location.href = './index.html'; return; }
++    if (pacDeferredInstall) {
++        pacShowOverlay('Opening the install dialog\u2026');
++        var ev = pacDeferredInstall;
++        pacDeferredInstall = null; // the event can only be used once
++        try {
++            ev.prompt();
++            var choice = await ev.userChoice;
++            if (choice && choice.outcome === 'accepted') {
++                // appinstalled will fire; fall back if the browser stays quiet
++                setTimeout(function () { if (!pacInstalled) { pacHideOverlay(); pacSetInstalledUI(); } }, 8000);
++            } else {
++                pacHideOverlay();
++                pacPrimeSteps(pacPlatform.os);
++            }
++        } catch (e) { pacHideOverlay(); pacPrimeSteps(pacPlatform.os); }
++    } else {
++        // No native dialog available (iOS Safari, Firefox, already installed,
++        // or criteria not met): guide the manual route.
++        pacPrimeSteps(pacPlatform.os);
++        var panel = document.getElementById({ android: 'steps-android', ios: 'steps-ios', desktop: 'steps-desktop' }[pacPlatform.os]);
++        if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
++    }
++}
++
++window.addEventListener('beforeinstallprompt', function (e) {
++    e.preventDefault();
++    pacDeferredInstall = e;
++    if (!pacStandalone) {
++        var label = document.getElementById('pac-install-label');
++        if (label) label.textContent = 'Install App';
++    }
++});
++
++window.addEventListener('appinstalled', function () {
++    pacInstalled = true;
++    pacShowOverlay('Finishing up\u2026');
++    document.getElementById('pac-status').textContent = 'PAC Media is installed \u2714';
++    document.getElementById('pac-msg').textContent = 'You will find it on your home screen.';
++    document.getElementById('pac-dots').hidden = true;
++    document.getElementById('pac-done').hidden = false;
++    setTimeout(function () { pacHideOverlay(); pacSetInstalledUI(); }, 4000);
++});
++
++document.addEventListener('DOMContentLoaded', function () {
++    pacPlatform = detectPlatform(navigator.userAgent);
++    pacStandalone = pacIsStandalone();
++
++    // mark the detected platform's step panel
++    var you = document.getElementById('you-' + pacPlatform.os);
++    if (you) you.hidden = false;
++    pacPrimeSteps(pacPlatform.os);
++
++    var btn = document.getElementById('pac-install-btn');
++    var label = document.getElementById('pac-install-label');
++
++    if (pacStandalone) {
++        label.textContent = 'Open PAC Media';
++    } else if (pacPlatform.os === 'ios') {
++        label.textContent = 'Add to Home Screen';
++    }
++
++    btn.addEventListener('click', pacStartInstall);
++
++    document.getElementById('pac-share-btn').addEventListener('click', function () {
++        var shareLabel = document.getElementById('pac-share-label');
++        var url = window.location.href;
++        if (navigator.share) {
++            navigator.share({
++                title: 'PAC Media',
++                text: 'Get the PAC Media app \u2014 Publishing Brands. Connecting Audiences.',
++                url: url
++            }).catch(function () {});
++        } else if (navigator.clipboard && navigator.clipboard.writeText) {
++            navigator.clipboard.writeText(url).then(function () {
++                shareLabel.textContent = 'Link copied \u2714';
++                setTimeout(function () { shareLabel.textContent = 'Share'; }, 2000);
++            }).catch(function () {});
++        } else {
++            var ta = document.createElement('textarea');
++            ta.value = url;
++            document.body.appendChild(ta);
++            ta.select();
++            try { document.execCommand('copy'); shareLabel.textContent = 'Link copied \u2714'; } catch (e) {}
++            document.body.removeChild(ta);
++            setTimeout(function () { shareLabel.textContent = 'Share'; }, 2000);
++        }
++    });
++});
++
++/* Register the app's service worker so this page is part of the PWA
++   (install prompts need the manifest + service worker on the same origin) */
++if ('serviceWorker' in navigator && location.protocol === 'https:') {
++    navigator.serviceWorker.register('sw.js').catch(function () {});
++}
++</script>
++
++</body>
++</html>
+diff --git a/sw.js b/sw.js
+index 7aa303e..96aacc0 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,8 +1,9 @@
+ /* PAC Media service worker - offline app shell */
+-const CACHE = 'pac-media-v8';
++const CACHE = 'pac-media-v9';
+ const ASSETS = [
+   './',
+   './index.html',
++  './install.html',
+   './manifest.json',
+   './icons/icon-192.png',
+   './icons/icon-512.png',
